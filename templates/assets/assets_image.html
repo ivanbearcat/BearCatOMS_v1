@@ -1,0 +1,131 @@
+{% extends 'public/index.html' %}
+{% block css %}
+{% endblock %}
+{% block body %}
+<div id="container1" style="min-width:700px;height:400px"></div>
+<div id="container2" style="min-width:700px;height:400px"></div>
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript" src="/static/assets/plugins/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="/static/assets/plugins/highcharts/highcharts.js"></script>
+<script type="text/javascript" src="/static/assets/plugins/highcharts/exporting.js"></script>
+<script type="text/javascript" src="/static/assets/plugins/highcharts/highcharts-3d.js"></script>
+
+<script type="text/javascript">
+$(function () {
+    data = get_data()
+    $('#container1').highcharts({
+        chart: {
+            type: 'bar'
+        },
+        title: {
+            text: '资产统计图'
+        },
+//        subtitle: {
+//            text: ''
+//        },
+
+        xAxis: {
+            categories: ['未发放', '已发放','总资产'],
+            title: {
+                text: null
+            }
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: '个数',
+                align: 'high'
+            },
+            labels: {
+                overflow: 'justify'
+            }
+        },
+        tooltip: {
+            valueSuffix: ''
+        },
+        plotOptions: {
+            bar: {
+                dataLabels: {
+                    enabled: true
+                }
+            }
+        },
+        legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'top',
+            x: -40,
+            y: 100,
+            floating: true,
+            borderWidth: 1,
+            backgroundColor: '#FFFFFF',
+            shadow: true
+        },
+        credits: {
+            enabled: false
+        },
+          series: data['data']
+    });
+
+    $('#container2').highcharts({
+        chart: {
+            type: 'pie',
+            options3d: {
+                enabled: true,
+                alpha: 45,
+                beta: 0
+            }
+        },
+        credits :{
+                enabled: true,
+                text : "战世运维"
+            },
+        title: {
+            text: ''
+        },
+        tooltip: {
+            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+        },
+        plotOptions: {
+            pie: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                depth: 35,
+                dataLabels: {
+                    enabled: true,
+                    format: '{point.name}'
+                }
+            }
+        },
+        series: [{
+            type: 'pie',
+            name: '资产',
+            data: [
+                {
+                    name: '未发放',
+                    y: data['not'],
+                    sliced: true,
+                    selected: true
+                },
+                ['已发放',    data['already']],
+            ]
+        }]
+    })
+});
+
+function get_data(){
+    var result;
+    $.ajax({
+        type: "POST",
+        url: '/assets_get_data/',
+        async: false,
+        success:function(data){
+            result = data
+        }
+    })
+    return  result;
+}
+</script>
+{% endblock %}

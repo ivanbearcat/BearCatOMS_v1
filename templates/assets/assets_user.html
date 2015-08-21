@@ -1,0 +1,383 @@
+{% extends 'public/index.html' %}
+{% block css %}
+<link href="/static/assets/theme/default/style.min.css" rel="stylesheet"/>
+<!-- BEGIN PAGE LEVEL STYLES -->
+<!--<link href="/static/assets/css/select2.css" rel="stylesheet" />-->
+<link rel="stylesheet" type="text/css" href="/static/assets/plugins/select2/select2.css"/>
+<link rel="stylesheet" type="text/css" href="/static/assets/plugins/select2/select2-metronic.css"/>
+<link rel="stylesheet" href="/static/assets/css/DT_bootstrap.css"/>
+<!-- END PAGE LEVEL STYLES -->
+<link rel="stylesheet" type="text/css" href="/static/assets/plugins/bootstrap-select/bootstrap-select.min.css"/>
+<link rel="stylesheet" type="text/css" href="/static/assets/plugins/jquery-multi-select/css/multi-select.css"/>
+{% endblock %}
+{% block body %}
+<div class="row">
+    <div class="col-md-12">
+        <!-- BEGIN EXAMPLE TABLE PORTLET-->
+        <div class="portlet box grey tasks-widget">
+            <div class="portlet-title">
+                <div class="caption">
+                    <i class="fa fa-globe"></i>员工资产
+                </div>
+            </div>
+            <div class="portlet-body">
+                <table class="table table-striped table-bordered table-hover table-full-width"  id="datatables">
+                    <thead>
+                    <tr>
+                        <th>姓名</th>
+                        <th>部门</th>
+                        <th>资产</th>
+                        <th>备注</th>
+                        <th>派发时间</th>
+                        <th>ID</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- END EXAMPLE TABLE PORTLET-->
+    </div>
+
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                    <h4 class="modal-title">派发资产</h4>
+                </div>
+                <div class="modal-body form">
+                    <form action="#" class="form-horizontal form-row-seperated">
+                        <div class="form-group">
+                            <label class="col-sm-4 control-label">姓名</label>
+
+                            <div class="col-sm-8">
+                                <div class="input-group">
+                                                                <span class="twitter-typeahead"
+                                                                      style="position: relative; display: inline-block;">
+                                                                    <input type="text" class="form-control tt-hint"
+                                                                           disabled="" autocomplete="off" spellcheck="false"
+                                                                           style="position: absolute; top: 0px; left: 0px; border-color: transparent; box-shadow: none; background: none 0% 0% / auto repeat scroll padding-box border-box rgb(255, 255, 255);">
+                                                                    <input type="text" id="name"
+                                                                           name="typeahead_example_modal_1"
+                                                                           class="form-control tt-input" autocomplete="off"
+                                                                           spellcheck="false" dir="auto"
+                                                                           style="width: 250px;position: relative; vertical-align: top; background-color: transparent;"><pre
+                                                                        aria-hidden="true"
+                                                                        style="position: absolute; visibility: hidden; white-space: nowrap; font-family: 'Open Sans', sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 400; word-spacing: 0px; letter-spacing: 0px; text-indent: 0px; text-rendering: auto; text-transform: none;"></pre><span
+                                                                        class="tt-dropdown-menu"
+                                                                        style="position: absolute; top: 100%; left: 0px; z-index: 100; display: none;"><div
+                                                                        class="tt-dataset-1"></div></span></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-4 control-label">部门</label>
+
+                            <div class="col-sm-8">
+                                <div class="input-group">
+                                                                <span class="twitter-typeahead"
+                                                                      style="position: relative; display: inline-block;">
+                                                                    <input type="text" class="form-control tt-hint"
+                                                                           disabled="" autocomplete="off" spellcheck="false"
+                                                                           style="position: absolute; top: 0px; left: 0px; border-color: transparent; box-shadow: none; background: none 0% 0% / auto repeat scroll padding-box border-box rgb(255, 255, 255);">
+                                                                    <input type="text" id="department"
+                                                                           name="typeahead_example_modal_1"
+                                                                           class="form-control tt-input" autocomplete="off"
+                                                                           spellcheck="false" dir="auto"
+                                                                           style="width: 250px;position: relative; vertical-align: top; background-color: transparent;"><pre
+                                                                        aria-hidden="true"
+                                                                        style="position: absolute; visibility: hidden; white-space: nowrap; font-family: 'Open Sans', sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 400; word-spacing: 0px; letter-spacing: 0px; text-indent: 0px; text-rendering: auto; text-transform: none;"></pre><span
+                                                                        class="tt-dropdown-menu"
+                                                                        style="position: absolute; top: 100%; left: 0px; z-index: 100; display: none;"><div
+                                                                        class="tt-dataset-1"></div></span></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                        <label class="col-sm-4 control-label">资产</label>
+
+                        <div class="col-sm-8">
+                            <div class="input-group">
+															<span class="twitter-typeahead"
+                                                                  style="position: relative; display: inline-block;">
+                                                                <input type="text" class="form-control tt-hint"
+                                                                       disabled="" autocomplete="off" spellcheck="false"
+                                                                       style="position: absolute; top: 0px; left: 0px; border-color: transparent; box-shadow: none; background: none 0% 0% / auto repeat scroll padding-box border-box rgb(255, 255, 255);">
+                                                                <div type="text" id="asset"
+                                                                     name="typeahead_example_modal_1"
+                                                                     class="form-control tt-input" autocomplete="off"
+                                                                     spellcheck="false" dir="auto"
+                                                                     style="width: 250px;position: relative; vertical-align: top; background-color: transparent;"></div><pre
+                                                                    aria-hidden="true"
+                                                                    style="position: absolute; visibility: hidden; white-space: nowrap; font-family: 'Open Sans', sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 400; word-spacing: 0px; letter-spacing: 0px; text-indent: 0px; text-rendering: auto; text-transform: none;"></pre><span
+                                                                    class="tt-dropdown-menu"
+                                                                    style="position: absolute; top: 100%; left: 0px; z-index: 100; display: none;"><div
+                                                                    class="tt-dataset-1"></div></span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                        <div class="form-group last">
+                            <label class="col-sm-4 control-label">备注</label>
+
+                            <div class="col-sm-6">
+                                <textarea class="form-control" id='comment' style="width: 290px" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div id="id" style="display: none"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" onclick="rule_save()"><i class="fa fa-check"></i>保存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--/datatables-->
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript" src="/static/assets/plugins/select2/select2.min.js"></script>
+<script type="text/javascript" src="/static/assets/plugins/data-tables/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="/static/assets/plugins/data-tables/DT_bootstrap.js"></script>
+
+<script src="/static/assets/plugins/context.js"></script>
+<script src="/static/assets/plugins/jstree/dist/jstree.min.js"></script>
+<script src="/static/assets/plugins/holder.js"></script>
+<script src="/static/assets/plugins/stilearn-base.js"></script>
+<script type="text/javascript" src="/static/assets/plugins/bootstrap-select/bootstrap-select.min.js"></script>
+<script type="text/javascript" src="/static/assets/plugins/jquery-multi-select/js/jquery.multi-select.js"></script>
+<script src="/static/assets/plugins/select2/select2.js"></script>
+<script src="/static/assets/plugins/datatables/extras/TableTools.min.js"></script>
+<script src="/static/assets/scripts/custom/table-managed.js"></script>
+
+
+
+<script type="text/javascript">
+var oTable;
+var aButtons
+/* Formating function for row details */
+
+$(document).ready(function () {
+    aButtons = [
+            {
+                "sExtends": 'text',
+
+                "sButtonText": '<font color="white">派发</font><i class="fa fa-plus"></i>',
+                "sButtonClass": "btn green ",
+                "fnComplete": function (nButton, oConfig, nRow) {
+                    add()
+                }
+
+            },
+            {
+                "sExtends": 'select',
+                "sButtonText": '<font color="white">编辑</font><i class="fa fa-edit"></i>',
+                "sButtonClass": "btn blue",
+                "fnComplete": function (nButton, oConfig, nRow) {
+                    edit()
+                }
+
+            },
+            {
+                "sExtends": 'select',
+                "sButtonText": '<font color="white">删除</font><i class="fa fa-times"></i>',
+                "sButtonClass": "btn btn-danger",
+                "fnComplete": function (nButton, oConfig, nRow) {
+                    del()
+                }
+            }
+        ]
+    loaddata()
+
+
+});
+function loaddata() {
+    oTable = $('#datatables').dataTable({
+        "sAjaxSource": "/assets_user_data/?rand=" + Math.random(),
+        "sDom": "<'row-fluid'<'span6'T><'span6'f>r><'table-scrollable't><'fluid'<'span3'l><'span4'i><'span5'p>>",
+        "bServerSide": true,
+        "bPaginate": true, // 是否使用分页
+        "bProcessing": true, //是否显示正在处理的提示
+        "bLengthChange": true, //是否启用设置每页显示记录数
+        "bFilter": true, //是否使用搜索
+        "bStateSave": false,
+        "bDestroy": true,
+        "bSort": true, //是否使用排序
+        "bAutoWidth": true, //列的宽度会根据table的宽度自适应
+        "sPaginationType": "bootstrap",
+//        "aLengthMenu": [
+//                    [5, 15, 20, -1],
+//                    [5, 15, 20, "All"] // change per page values here
+//                ],
+        "oTableTools": {
+            "sRowSelect": "single",
+            'aButtons': aButtons
+        },
+        "aoColumns": [
+            { "sClass": "center", 'sWidth': "10%"},
+            { "sClass": "center", 'sWidth': "10%"},
+            { "sClass": "center", 'sWidth': "30%"},
+            { "sClass": "center", 'sWidth': "20%"},
+            { "sClass": "center", 'sWidth': "10%"},
+            { "sClass": "center", 'sWidth': "5%"}
+
+
+        ],
+        "aaSorting": [
+            [4, 'desc']
+        ],
+        "oLanguage": {
+            "sProcessing": "正在加载数据...",
+            'sSearch': '数据筛选:',
+            "sLengthMenu": "每页显示 _MENU_ 项记录",
+            "sZeroRecords": "没有符合项件的数据...",
+            "sInfo": "当前数据为从第 _START_ 到第 _END_ 项数据；总共有 _TOTAL_ 项记录",
+            "sInfoEmpty": "显示 0 至 0 共 0 项",
+            "sInfoFiltered": "(_MAX_)",
+            "oPaginate": {
+                "sFirst": '首页',
+                "sPrevious": "上一页",
+                "sNext": "下一页",
+                "sLast": "最后一页"
+            }
+
+        },
+        "fnInitComplete": function (oSettings, json) {
+            $('input[type=checkbox],input[type=radio],input[type=file]').uniform()
+        },
+        "fnDrawCallback": function (oSettings) {
+            $('input[type=checkbox],input[type=radio],input[type=file]').uniform()
+        },
+        "fnRowCallback": function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
+        },
+        "fnServerData": function (sSource, aoData, fnCallback) {
+            $.ajax({
+                "dataType": 'json',
+                "type": "POST",
+                "url": sSource,
+                "data": aoData,
+                "success": fnCallback
+            });
+        }
+    });
+}
+
+function rule_save() {
+    var asset_list = []
+    var asset = $('#asset').select2('data')
+    for (var i in asset) {
+        asset_list.push(asset[i]["id"])
+    }
+    asset = asset_list.join(',')
+    var department = $('#department').val();
+    var comment = $('#comment').val();
+    var name = $('#name').val();
+    var id = $('#id').val();
+    if (department == '' || name == '' || asset == '') {
+        toastr.error('不能为空')
+        return;
+    }
+
+    showAjaxLoad()
+    $(self).button('loading');//正在登陆中，显示data-loading-text 标记内容
+
+
+    $.ajax({
+        url: '/assets_user_save/',
+        type: "POST",
+        data: {
+            id: id,
+            comment: comment,
+            department: department,
+            asset: asset,
+            name: name
+        },
+        success: function (d) {
+            hideAjaxLoad()
+            if (d.code == 0) {
+                toastr.success(d.msg)
+                $('#datatables').dataTable().fnDraw()
+            } else {
+                toastr.error(d.msg)
+            }
+        }
+    });
+    $('#myModal').modal('hide')
+    $(self).button('complete')
+}
+function contain(Array, s) {
+    for (var i = 0; i < Array.length; i++)
+        if (Array[i] == s)
+            return true;
+    return false;
+}
+function add() {
+    $('#asset').select2("data", "")
+    $.post('/assets_user_dropdown/', {}, function (d) {
+        $('#asset').select2({
+            multiple: true,
+            placeholder: '请选择资产',
+            allowClear: true,
+            data: d['list']
+        });
+
+    })
+    $('#name').val("")
+    $('#department').val("")
+    $('#comment').val("")
+    $('#id').val("")
+    $("#myModal").modal('show')
+}
+function edit() {
+
+    var oTT = TableTools.fnGetInstance('datatables');
+    var aData = oTT.fnGetSelectedData();
+    if (aData.length == 1) {
+        var name = aData[0][0];
+        var department = aData[0][1];
+        var asset = aData[0][2];
+        var comment = aData[0][3];
+        var id = aData[0][5];
+        $.post('/assets_user_dropdown/', {id: id}, function (d) {
+            $('#asset').select2({
+                multiple: true,
+                placeholder: '请选择资产',
+                data: d['list']
+            });
+            $('#asset').select2("data",d['edit'])
+        })
+        $('#name').val(name)
+        $('#department').val(department)
+        $('#comment').val(comment)
+        $('#id').val(id)
+        $("#myModal").modal('show')
+    }
+
+
+}
+function del() {
+    var oTT = TableTools.fnGetInstance('datatables');
+    var aData = oTT.fnGetSelectedData();
+    if (aData.length == 1) {
+        showAjaxLoad()
+        $.post('/assets_user_del/', {id: aData[0][5]}, function (d) {
+            hideAjaxLoad()
+            if (d.code == 0) {
+                toastr.success(d.msg)
+                $('#datatables').dataTable().fnDraw()
+            } else {
+                toastr.error(d.msg)
+            }
+        })
+    }
+}
+
+</script>
+{% endblock %}

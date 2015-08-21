@@ -1,0 +1,24 @@
+/* Foundation v2.1.4 http://foundation.zurb.com */
+/* lyd */
+
+
+ .ajax_load {
+          position: absolute; top: 0px; filter: alpha(opacity=60);
+          z-index: 10202; left: 0px;
+          opacity:0.5; -moz-opacity:0.5;
+          background:url("../img/loading-big.gif");
+          background-repeat:no-repeat;
+          background-position:center;
+        }
+/* -----------------------------------------
+   Page Name 1
+----------------------------------------- */
+
+
+
+
+/* -----------------------------------------
+   Page Name 2
+----------------------------------------- */
+
+

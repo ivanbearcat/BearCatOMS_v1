@@ -1,0 +1,135 @@
+{% extends 'public/index.html' %}
+{% block css %}
+<link href="/static/assets/theme/default/style.min.css" rel="stylesheet"/>
+<!-- BEGIN PAGE LEVEL STYLES -->
+<link rel="stylesheet" type="text/css" href="/static/assets/plugins/select2/select2.css"/>
+<link rel="stylesheet" type="text/css" href="/static/assets/plugins/select2/select2-metronic.css"/>
+<link rel="stylesheet" href="/static/assets/css/DT_bootstrap.css"/>
+<!-- END PAGE LEVEL STYLES -->
+<link rel="stylesheet" type="text/css" href="/static/assets/plugins/bootstrap-select/bootstrap-select.min.css"/>
+<link rel="stylesheet" type="text/css" href="/static/assets/plugins/jquery-multi-select/css/multi-select.css"/>
+{% endblock %}
+{% block body %}
+<div class="row">
+    <div class="col-md-12">
+        <!-- BEGIN EXAMPLE TABLE PORTLET-->
+        <div class="portlet box grey tasks-widget">
+            <div class="portlet-title">
+                <div class="caption">
+                    <i class="fa fa-globe"></i>资产出入库
+                </div>
+            </div>
+            <div class="portlet-body">
+                <table class="table table-striped table-bordered table-hover table-full-width"  id="datatables">
+                    <thead>
+                    <tr>
+                        <th>记录</th>
+                        <th>时间</th>
+                        <th>ID</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- END EXAMPLE TABLE PORTLET-->
+    </div>
+</div>
+
+<!--/datatables-->
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript" src="/static/assets/plugins/select2/select2.min.js"></script>
+<script type="text/javascript" src="/static/assets/plugins/data-tables/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="/static/assets/plugins/data-tables/DT_bootstrap.js"></script>
+
+<!--<script src="/static/assets/plugins/context.js"></script>-->
+<!--<script src="/static/assets/plugins/jstree/dist/jstree.min.js"></script>-->
+<script src="/static/assets/plugins/holder.js"></script>
+<script src="/static/assets/plugins/stilearn-base.js"></script>
+<script type="text/javascript" src="/static/assets/plugins/bootstrap-select/bootstrap-select.min.js"></script>
+<script type="text/javascript" src="/static/assets/plugins/jquery-multi-select/js/jquery.multi-select.js"></script>
+<script src="/static/assets/plugins/select2/select2.js"></script>
+<script src="/static/assets/plugins/datatables/extras/TableTools.min.js"></script>
+<script src="/static/assets/scripts/custom/table-managed.js"></script>
+
+
+
+<script type="text/javascript">
+var oTable;
+var aButtons
+/* Formating function for row details */
+
+$(document).ready(function () {
+    loaddata()
+});
+
+function loaddata() {
+    oTable = $('#datatables').dataTable({
+        "sAjaxSource": "/assets_log_data/?rand=" + Math.random(),
+        //"sDom": "<'row-fluid'<'span6'T><'span6'f>r><'table-scrollable't><'fluid'<'span3'l><'span4'i><'span5'p>>",
+        "bServerSide": true,
+        "bPaginate": true, // 是否使用分页
+        "bProcessing": true, //是否显示正在处理的提示
+        "bLengthChange": true, //是否启用设置每页显示记录数
+        "bFilter": true, //是否使用搜索
+        "bStateSave": false,
+        "bDestroy": true,
+        "bSort": true, //是否使用排序
+        "bAutoWidth": true, //列的宽度会根据table的宽度自适应
+        "sPaginationType": "bootstrap",
+//        "aLengthMenu": [
+//                    [5, 15, 20, -1],
+//                    [5, 15, 20, "All"] // change per page values here
+//                ],
+        "oTableTools": {
+            "sRowSelect": "single",
+            'aButtons': []
+        },
+        "aoColumns": [
+            { "sClass": "center", 'sWidth': "75%"},
+            { "sClass": "center", 'sWidth': "15%"},
+            { "sClass": "center", 'sWidth': "10%"}
+        ],
+        "aaSorting": [
+            [1, 'desc']
+        ],
+        "oLanguage": {
+            "sProcessing": "正在加载数据...",
+            'sSearch': '数据筛选:',
+            "sLengthMenu": "每页显示 _MENU_ 项记录",
+            "sZeroRecords": "没有符合项件的数据...",
+            "sInfo": "当前数据为从第 _START_ 到第 _END_ 项数据；总共有 _TOTAL_ 项记录",
+            "sInfoEmpty": "显示 0 至 0 共 0 项",
+            "sInfoFiltered": "(_MAX_)",
+            "oPaginate": {
+                "sFirst": '首页',
+                "sPrevious": "上一页",
+                "sNext": "下一页",
+                "sLast": "最后一页"
+            }
+
+        },
+        "fnInitComplete": function (oSettings, json) {
+            $('input[type=checkbox],input[type=radio],input[type=file]').uniform()
+        },
+        "fnDrawCallback": function (oSettings) {
+            $('input[type=checkbox],input[type=radio],input[type=file]').uniform()
+        },
+        "fnRowCallback": function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
+        },
+        "fnServerData": function (sSource, aoData, fnCallback) {
+            $.ajax({
+                "dataType": 'json',
+                "type": "POST",
+                "url": sSource,
+                "data": aoData,
+                "success": fnCallback
+            });
+        }
+    });
+}
+</script>
+{% endblock %}

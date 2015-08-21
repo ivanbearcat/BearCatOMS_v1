@@ -1,0 +1,146 @@
+{% extends 'public/index.html' %}
+{% block body %}
+
+<div class="row profile">
+				<div class="col-md-12">
+					<!--BEGIN TABS-->
+					<div class="tabbable tabbable-custom tabbable-full-width">
+						<ul class="nav nav-tabs">
+							<li class="active">
+								<a href="#tab_1_1" data-toggle="tab">
+									 修改密码
+								</a>
+							</li>
+						</ul>
+						<div class="tab-content">
+							<!--tab_1_2-->
+							<div class="tab-pane active" id="tab_1_1">
+								<div class="row profile-account">
+									<div class="col-md-3">
+										<ul class="ver-inline-menu tabbable margin-bottom-10">
+											<li class="active">
+												<a data-toggle="tab" href="#tab_2-1">
+													<i class="fa fa-lock"></i> 修改用户密码
+												</a>
+											</li>
+                                            <li>
+												<a data-toggle="tab" href="#tab_2-2">
+													<i class="fa fa-lock"></i> 修改堡垒机密码
+												</a>
+											</li>
+										</ul>
+									</div>
+									<div class="col-md-9">
+										<div class="tab-content">
+											<div id="tab_2-1" class="tab-pane active">
+												<form action="">
+													<div class="form-group">
+														<label class="control-label">当前用户密码</label>
+														<input type="password" id='password_current'class="form-control" style="width:30%">
+													</div>
+													<div class="form-group">
+														<label class="control-label">新用户密码</label>
+														<input type="password" id='password_new' class="form-control" style="width:30%">
+													</div>
+													<div class="form-group">
+														<label class="control-label">重复用户新密码</label>
+														<input type="password" id='password_new_again'class="form-control" style="width:30%">
+													</div>
+													<div class="margin-top-10">
+														<a class="btn green" onclick="chpasswd()">
+															 修改密码
+														</a>
+														<a class="btn default" onclick="reset()">
+															 清除
+														</a>
+													</div>
+												</form>
+											</div>
+                                            <div id="tab_2-2" class="tab-pane">
+												<form action="">
+													<div class="form-group">
+														<label class="control-label">当前堡垒机密码</label>
+														<input type="password" id='server_password_current'class="form-control" style="width:30%">
+													</div>
+													<div class="form-group">
+														<label class="control-label">新堡垒机密码</label>
+														<input type="password" id='server_password_new' class="form-control" style="width:30%">
+													</div>
+													<div class="form-group">
+														<label class="control-label">重复堡垒机新密码</label>
+														<input type="password" id='server_password_new_again'class="form-control" style="width:30%">
+													</div>
+													<div class="margin-top-10">
+														<a class="btn green" onclick="server_chpasswd()">
+															 修改密码
+														</a>
+														<a class="btn default" onclick="reset()">
+															 清除
+														</a>
+													</div>
+												</form>
+											</div>
+										</div>
+									</div>
+									<!--end col-md-9-->
+								</div>
+							</div>
+							<!--end tab-pane-->
+							<!--end tab-pane-->
+						</div>
+					</div>
+					<!--END TABS-->
+				</div>
+			</div>
+{% endblock %}
+{% block js %}
+<script type="text/javascript">
+
+function chpasswd(){
+var password_current = $('#password_current').val()
+var password_new = $('#password_new').val()
+var password_new_again = $('#password_new_again').val()
+showAjaxLoad()
+$.post('/post_chpasswd/', {password_current:password_current,password_new:password_new,password_new_again:password_new_again}, function (d) {
+            if (d.code == 0) {
+                toastr.success(d.msg)
+            } else {
+                toastr.error(d.msg);
+            }
+        })
+$('#password_current').val('')
+$('#password_new').val('')
+$('#password_new_again').val('')
+hideAjaxLoad()
+};
+
+function server_chpasswd(){
+var server_password_current = $('#server_password_current').val()
+var server_password_new = $('#server_password_new').val()
+var server_password_new_again = $('#server_password_new_again').val()
+showAjaxLoad()
+$.post('/post_server_chpasswd/', {server_password_current:server_password_current,server_password_new:server_password_new,server_password_new_again:server_password_new_again}, function (d) {
+            if (d.code == 0) {
+                toastr.success(d.msg)
+            } else {
+                toastr.error(d.msg);
+            }
+        })
+$('#server_password_current').val('')
+$('#server_password_new').val('')
+$('#server_password_new_again').val('')
+hideAjaxLoad()
+};
+
+function reset(){
+	$('#password_current').val('')
+	$('#password_new').val('')
+	$('#password_new_again').val('')
+    $('#server_password_current').val('')
+	$('#server_password_new').val('')
+	$('#server_password_new_again').val('')
+};
+</script>
+{% endblock %}
+
+
