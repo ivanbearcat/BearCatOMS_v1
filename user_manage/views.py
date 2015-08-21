@@ -4,11 +4,11 @@ from django.http import HttpResponseRedirect,HttpResponse
 from django.utils.log import logger
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-import simplejson,re,datetime,os
+import simplejson,re,datetime,os,pexpect,time
 from user_manage.models import perm
 from operation.models import server_group_list
 from django.db.models.query_utils import Q
-from BearCatOMS.settings import BASE_DIR,SECRET_KEY
+from BearCatOMS.settings import BASE_DIR,SECRET_KEY,CENTER_SERVER
 from libs import crypt
 from libs.check_perm import check_permission
 from libs.server_list_conf import server_lists
@@ -81,15 +81,27 @@ def post_server_chpasswd(request):
         try:
             if os.system('id %s' % request.user.username):
                 code = os.system('useradd -e $(date "+%D" -d "+3 months") ' + request.user.username + ' && echo ' + server_password_new_again + '|passwd --stdin ' + request.user.username)
-
+                p = pexpect.spawn('su xuezhimin -c ssh-keygen')
+                p.expect('Enter file in which to save the key.*')
+                p.sendline()
+                p.sendline()
+                p.sendline()
+                time.sleep(1)
                 if code:
                     return HttpResponse(simplejson.dumps({'code':code,'msg':'密码修改失败'}),content_type="application/json")
             else:
                 code = os.system('usermod -e $(date "+%D" -d "+3 months") ' + request.user.username + ' && echo ' + server_password_new_again + '|passwd --stdin ' + request.user.username)
                 if code:
                     return HttpResponse(simplejson.dumps({'code':code,'msg':'密码修改失败'}),content_type="application/json")
-            for i in server_lists.values():
-                os.system('ssh-copy-id -i /home/%s/.ssh/id_rsa.pub root@%s' % (request.user.username,i))
+            # for i in server_lists.values():
+            with open('/home/%s/.ssh/id_rsa.pub' % request.user.username) as f:
+                public_key = f.readline()
+            cmd = 'if ! grep %s;then echo "%s" >> /root/.ssh/authorized_keys;fi' % (request.user.username,public_key)
+            server_groups = server_group_list.objects.all()
+            for i in server_groups:
+                for j in i.members_server.split(','):
+                    client_send_data("{'salt':1,'act':'cmd.run','hosts':'%s','argv':%s}" % (j,cmd.split(',')),CENTER_SERVER[i.server_group_name][0],CENTER_SERVER[i.server_group_name][1])
+#                    os.system('ssh-copy-id -i /home/%s/.ssh/id_rsa.pub root@%s' % (request.user.username,j))
             if os.system('grep logout /home/%s/.bashrc'% request.user.username):
                 os.system('echo "python %s %s" >> /home/%s/.bashrc && echo "logout" >> /home/%s/.bashrc' % (BASE_DIR + '/fortress_server.py',request.user.username,request.user.username,request.user.username))
             orm.server_password = server_password_new
@@ -98,6 +110,7 @@ def post_server_chpasswd(request):
             code = 0
             msg = u'密码修改成功'
         except Exception,e:
+            print e
             code = 5
             msg = u'密码修改失败'
     return HttpResponse(simplejson.dumps({'code':code,'msg':msg}),content_type="application/json")

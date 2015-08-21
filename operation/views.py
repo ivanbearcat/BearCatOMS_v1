@@ -38,7 +38,7 @@ class UploadFileForm(forms.Form):
 def handle_uploaded_file(request,f):
     file_name = ''
     try:
-        path = 'uploads/'
+        path = BASE_DIR + '/uploads/'
         file_name = path + f.name
         if not os.path.exists(path):
             os.makedirs(path)
@@ -162,7 +162,7 @@ def upload_upload(request):
             cmdLine = []
             cmdLine.append('rsync')
             cmdLine.append('--progress')
-            cmdLine.append('uploads/%s' % file_name)
+            cmdLine.append(BASE_DIR + '/uploads/%s' % file_name)
             cmdLine.append('%s:%s' % (rsync_ip,rsync_dir))
             tmpFile = BASE_DIR + "/tmp/upload.tmp"  #临时生成一个文件
             fpWrite = open(tmpFile,'w')
@@ -298,7 +298,7 @@ def get_server_list(request):
     for i in  result_data:
         aaData.append({
                        '0':i.server_name,
-                       '1':i.ip,
+                       '1':i.inner_ip,
                        '2':i.os,
                        '3':i.belong_to,
                        '4':i.status,
@@ -320,13 +320,18 @@ def search_server_list(request):
             for k,v in dict_data.items():
                 uniq_test = server_list.objects.filter(server_name=k)
                 if v == True and not uniq_test:
-                    ip = client_send_data("{'salt':1,'act':'grains.item','hosts':'%s','argv':['ipv4']}" % k,CENTER_SERVER[i][0],CENTER_SERVER[i][1])
-                    ip = eval(ip)
-                    ip[k]['ipv4'].remove('127.0.0.1')
+                    inner_ip = client_send_data("{'salt':1,'act':'grains.item','hosts':'%s','argv':['ipv4']}" % k,CENTER_SERVER[i][0],CENTER_SERVER[i][1])
+                    inner_ip = eval(inner_ip)
+                    inner_ip[k]['ipv4'].remove('127.0.0.1')
+                    cmd = ["curl http://www.whereismyip.com/|grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'"]
+                    external_ip = client_send_data("{'salt':1,'act':'cmd.run','hosts':'%s','argv':%s}" % (k,cmd),CENTER_SERVER[i][0],CENTER_SERVER[i][1])
+                    external_ip = eval(external_ip)
+                    external_ip = external_ip[k].split('\n')[-1]
+                    print external_ip
                     os = client_send_data("{'salt':1,'act':'grains.item','hosts':'%s','argv':['os']}" % k,CENTER_SERVER[i][0],CENTER_SERVER[i][1])
                     os = eval(os)
                     belong_to = i
-                    server_list.objects.create(server_name=k,ip=ip[k]['ipv4'],os=os[k]['os'],belong_to=belong_to,status=1)
+                    server_list.objects.create(server_name=k,inner_ip=inner_ip[k]['ipv4'],os=os[k]['os'],belong_to=belong_to,status=1)
                 elif uniq_test:
                     orm_server = server_list.objects.get(server_name=k)
                     orm_server.status = 1

@@ -9,7 +9,8 @@ class upload_files(models.Model):
 
 class server_list(models.Model):
     server_name = models.CharField(verbose_name='服务器名', max_length=32, blank=False, unique=True)
-    ip = models.CharField(verbose_name='IP', max_length=64, blank=False)
+    inner_ip = models.CharField(verbose_name='内部IP', max_length=64, blank=False)
+    external_ip = models.CharField(verbose_name='外部IP', max_length=64, blank=False)
     os = models.CharField(verbose_name='系统', max_length=64, blank=False)
     belong_to = models.CharField(verbose_name='属于哪个服务器', max_length=64, blank=False)
     status = models.BooleanField(verbose_name='状态')
