@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 #coding:utf-8
 import MySQLdb,sys,os
-from libs.server_list_conf import server_lists
+#from libs.server_list_conf import server_lists
 from BearCatOMS.settings import BASE_DIR
 
 username = sys.argv[1]
 server_groups = []
 all_servers = []
 try:
-    conn=MySQLdb.connect(host='192.168.100.151',user='BearCat',passwd='xzm_123.',db='BearCatOMS',port=3306,charset="utf8")
+    conn=MySQLdb.connect(host='127.0.0.1',user='admin',passwd='!@#rp1qaz@WSX',db='BearCatOMS',port=3306,charset="utf8")
     cur=conn.cursor()
     cur.execute('select server_groups from user_manage_perm where username="%s"' % username)
     data = cur.fetchall()
