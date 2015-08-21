@@ -1,5 +1,5 @@
 # Django settings for BearCatOMS project.
-
+#coding:utf-8
 import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -19,9 +19,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'BearCatOMS',
-	    'USER': 'BearCat',
-	    'PASSWORD': 'BearCat',
-	    'HOST': '192.168.100.151',
+	    'USER': 'admin',
+	    'PASSWORD': '!@#rp1qaz@WSX',
+	    'HOST': '127.0.0.1',
     }
 }
 
@@ -186,4 +186,4 @@ LOGGING = {
 #FILE_UPLOAD_TEMP_DIR = 'tmp'
 
 #custom
-CENTER_SERVER = {'kingsoft':['192.168.100.151',7777,'/root/center_server/uploads/.']}
+CENTER_SERVER = {u'金山云':['123.59.107.121',7777,'/work/center_server/uploads/.']}

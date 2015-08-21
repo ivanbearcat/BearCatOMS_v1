@@ -8,6 +8,7 @@ import simplejson,re
 from django.db.models.query_utils import Q
 from audit.models import log
 from libs.check_perm import check_permission
+from BearCatOMS.settings import CENTER_SERVER
 
 @login_required
 def audit_log(request):
@@ -89,9 +90,12 @@ def audit_get_data(request):
     for i in last_command:
         if i.command == command:
             return HttpResponse('duplicate')
-    try:
-        log.objects.create(source_ip=ip,username=username,command=command,time=time)
-        return HttpResponse('success')
-    except Exception,e:
-        logger.error(e)
+    if ip and username and command and time:
+        try:
+            log.objects.create(source_ip=ip,username=username,command=command,time=time)
+            return HttpResponse('success')
+        except Exception,e:
+            logger.error(e)
+            return HttpResponse('error')
+    else:
         return HttpResponse('error')

@@ -302,6 +302,7 @@ function del() {
         $.post('/server_del/', {server_names:server_names}, function (d) {
             hideAjaxLoad()
             if (d.code == 0) {
+                $('#datatables').dataTable().fnDraw()
                 toastr.success(d.msg)
             } else {
                 toastr.error(d.msg)

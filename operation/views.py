@@ -322,7 +322,7 @@ def search_server_list(request):
                 if v == True and not uniq_test:
                     ip = client_send_data("{'salt':1,'act':'grains.item','hosts':'%s','argv':['ipv4']}" % k,CENTER_SERVER[i][0],CENTER_SERVER[i][1])
                     ip = eval(ip)
-                    ip[k]['ipv4'].pop(0)
+                    ip[k]['ipv4'].remove('127.0.0.1')
                     os = client_send_data("{'salt':1,'act':'grains.item','hosts':'%s','argv':['os']}" % k,CENTER_SERVER[i][0],CENTER_SERVER[i][1])
                     os = eval(os)
                     belong_to = i
