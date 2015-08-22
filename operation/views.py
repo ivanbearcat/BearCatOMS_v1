@@ -261,7 +261,7 @@ def get_server_list(request):
     sSearch = request.POST.get('sSearch')#高级搜索
 
     aaData = []
-    sort = ['server_name','ip','os','belong_to','status']
+    sort = ['server_name','inner_ip','external_ip','os','belong_to','status']
 
     if  sSortDir_0 == 'asc':
         if sSearch == '':
@@ -269,14 +269,14 @@ def get_server_list(request):
             iTotalRecords = server_list.objects.all().count()
         else:
             result_data = server_list.objects.filter(Q(server_name__contains=sSearch) | \
-                                               Q(ip__contains=sSearch) | \
-                                               Q(comment__contains=sSearch) | \
+                                               Q(inner_ip__contains=sSearch) | \
+                                               Q(external_ip__contains=sSearch) | \
                                                Q(belong_to__contains=sSearch) | \
                                                Q(os__contains=sSearch)) \
                                             .order_by(sort[iSortCol_0])[iDisplayStart:iDisplayStart+iDisplayLength]
             iTotalRecords = server_list.objects.filter(Q(server_name__contains=sSearch) | \
-                                                 Q(ip__contains=sSearch) | \
-                                                 Q(comment__contains=sSearch) | \
+                                                 Q(inner_ip__contains=sSearch) | \
+                                                 Q(external_ip__contains=sSearch) | \
                                                  Q(belong_to__contains=sSearch) | \
                                                  Q(os__contains=sSearch)).count()
     else:
@@ -285,14 +285,14 @@ def get_server_list(request):
             iTotalRecords = server_list.objects.all().count()
         else:
             result_data = server_list.objects.filter(Q(server_name__contains=sSearch) | \
-                                               Q(ip__contains=sSearch) | \
-                                               Q(comment__contains=sSearch) | \
+                                               Q(inner_ip__contains=sSearch) | \
+                                               Q(external_ip__contains=sSearch) | \
                                                Q(belong_to__contains=sSearch) | \
                                                Q(os__contains=sSearch)) \
                                             .order_by(sort[iSortCol_0]).reverse()[iDisplayStart:iDisplayStart+iDisplayLength]
             iTotalRecords = server_list.objects.filter(Q(server_name__contains=sSearch) | \
-                                                 Q(ip__contains=sSearch) | \
-                                                 Q(comment__contains=sSearch) | \
+                                                 Q(inner_ip__contains=sSearch) | \
+                                                 Q(external_ip__contains=sSearch) | \
                                                  Q(belong_to__contains=sSearch) | \
                                                  Q(os__contains=sSearch)).count()
 
