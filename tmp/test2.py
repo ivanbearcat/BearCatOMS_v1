@@ -1,21 +1,9 @@
 #coding:utf-8
-from multiprocessing import Process
-import Queue
-import time,os
-
-
-def a():
-    while 1:
-        print 1
-        time.sleep(1)
-
-
-if __name__ == '__main__':
-    q = Queue.Queue()
-    s = Process(target=a)
-    q.put(s)
-    s.start()
-    l = q.get()
-    print l
-    time.sleep(5)
-    l.terminate()
+from libs.socket_send_data import client_send_data
+import time
+cmd = ["curl http://www.whereismyip.com/|grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'"]
+start = time.time()
+external_ip = client_send_data("{'salt':1,'act':'cmd.run','hosts':'%s','argv':%s}" % ('DB-01',cmd),'123.59.107.121',7777)
+end = time.time()
+print external_ip
+print end - start
