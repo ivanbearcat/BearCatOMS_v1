@@ -19,7 +19,6 @@
 
 import socket
 import sys
-import commands
 import datetime
 import MySQLdb
 
@@ -41,10 +40,15 @@ def interactive_shell(chan,web_username,source_ip):
 
 def posix_shell(chan,web_username,source_ip):
     import select
-    
+    with open('/home/%s/.tempfile' % web_username) as f:
+        DATABASES = f.readline()
+        DATABASES = eval(DATABASES)
+
     oldtty = termios.tcgetattr(sys.stdin)
-    conn = MySQLdb.connect(host='localhost',user='BearCat',passwd='xzm_123.',db='BearCatOMS',port=3306)
+    print DATABASES['HOST'],DATABASES['USER'],DATABASES['PASSWORD'],DATABASES['NAME']
+    conn=MySQLdb.connect(host=DATABASES['HOST'],user=DATABASES['USER'],passwd=DATABASES['PASSWORD'],db=DATABASES['NAME'],port=3306,charset="utf8")
     cur = conn.cursor()
+
     try:
         tty.setraw(sys.stdin.fileno())
         tty.setcbreak(sys.stdin.fileno())

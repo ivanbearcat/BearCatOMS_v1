@@ -299,10 +299,11 @@ def get_server_list(request):
         aaData.append({
                        '0':i.server_name,
                        '1':i.inner_ip,
-                       '2':i.os,
-                       '3':i.belong_to,
-                       '4':i.status,
-                       '5':i.id
+                       '2':i.external_ip,
+                       '3':i.os,
+                       '4':i.belong_to,
+                       '5':i.status,
+                       '6':i.id
                       })
     result = {'sEcho':sEcho,
                'iTotalRecords':iTotalRecords,
@@ -327,11 +328,10 @@ def search_server_list(request):
                     external_ip = client_send_data("{'salt':1,'act':'cmd.run','hosts':'%s','argv':%s}" % (k,cmd),CENTER_SERVER[i][0],CENTER_SERVER[i][1])
                     external_ip = eval(external_ip)
                     external_ip = external_ip[k].split('\n')[-1]
-                    print external_ip
                     os = client_send_data("{'salt':1,'act':'grains.item','hosts':'%s','argv':['os']}" % k,CENTER_SERVER[i][0],CENTER_SERVER[i][1])
                     os = eval(os)
                     belong_to = i
-                    server_list.objects.create(server_name=k,inner_ip=inner_ip[k]['ipv4'],os=os[k]['os'],belong_to=belong_to,status=1)
+                    server_list.objects.create(server_name=k,inner_ip=','.join(inner_ip[k]['ipv4']),external_ip=external_ip,os=os[k]['os'],belong_to=belong_to,status=1)
                 elif uniq_test:
                     orm_server = server_list.objects.get(server_name=k)
                     orm_server.status = 1

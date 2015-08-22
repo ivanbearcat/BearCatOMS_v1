@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 #coding:utf-8
 import MySQLdb,sys,os
-#from libs.server_list_conf import server_lists
-from BearCatOMS.settings import BASE_DIR
-from libs.socket_send_data import client_send_data
+from BearCatOMS.settings import BASE_DIR,DATABASES
 
 username = sys.argv[1]
 server_groups = []
 all_servers = []
+with open('/home/%s/.tempfile' % username,'w') as f:
+    f.write('''{'HOST': '%s', 'USER': '%s','PASSWORD': '%s','NAME': '%s',}''' % (DATABASES.values()[0]['HOST'],DATABASES.values()[0]['USER'],DATABASES.values()[0]['PASSWORD'],DATABASES.values()[0]['NAME']))
+
 try:
-    conn=MySQLdb.connect(host='127.0.0.1',user='admin',passwd='!@#rp1qaz@WSX',db='BearCatOMS',port=3306,charset="utf8")
+    conn=MySQLdb.connect(host=DATABASES.values()[0]['HOST'],user=DATABASES.values()[0]['USER'],passwd=DATABASES.values()[0]['PASSWORD'],db=DATABASES.values()[0]['NAME'],port=3306,charset="utf8")
     cur=conn.cursor()
     cur.execute('select server_groups from user_manage_perm where username="%s"' % username)
     data = cur.fetchall()
@@ -44,9 +45,16 @@ while 1:
         if hostname == '' or hostname not in all_servers:
             print '主机名不正确'
             continue
-        client_send_data("{'salt':1,'act':'cmd.run','hosts':'%s','argv':%s}" % (j,cmd.split(',')),CENTER_SERVER[i.server_group_name][0],CENTER_SERVER[i.server_group_name][1])
-
-        os.system('python %s/others/audit_shell/audit_shell.py %s %s' % (BASE_DIR,server_lists[hostname],username))
+        conn=MySQLdb.connect(host=DATABASES.values()[0]['HOST'],user=DATABASES.values()[0]['USER'],passwd=DATABASES.values()[0]['PASSWORD'],db=DATABASES.values()[0]['NAME'],port=3306,charset="utf8")
+        cur=conn.cursor()
+        cur.execute('select external_ip from operation_server_list where server_name="%s"' % hostname)
+        data = cur.fetchone()
+        for i in data:
+            external_ip = i
+        conn.commit()
+        cur.close()
+        conn.close()
+        os.system('python %s/others/audit_shell/audit_shell.py %s %s' % (BASE_DIR,i,username))
     except Exception:
         continue
     except KeyboardInterrupt:

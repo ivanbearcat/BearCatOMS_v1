@@ -81,12 +81,12 @@ def post_server_chpasswd(request):
         try:
             if os.system('id %s' % request.user.username):
                 code = os.system('useradd -e $(date "+%D" -d "+3 months") ' + request.user.username + ' && echo ' + server_password_new_again + '|passwd --stdin ' + request.user.username)
-                p = pexpect.spawn('su xuezhimin -c ssh-keygen')
+                p = pexpect.spawn('su %s -c ssh-keygen' % request.user.username)
                 p.expect('Enter file in which to save the key.*')
                 p.sendline()
                 p.sendline()
                 p.sendline()
-                time.sleep(1)
+                time.sleep(3)
                 if code:
                     return HttpResponse(simplejson.dumps({'code':code,'msg':'密码修改失败'}),content_type="application/json")
             else:
@@ -96,7 +96,7 @@ def post_server_chpasswd(request):
             # for i in server_lists.values():
             with open('/home/%s/.ssh/id_rsa.pub' % request.user.username) as f:
                 public_key = f.readline()
-            cmd = 'if ! grep %s;then echo "%s" >> /root/.ssh/authorized_keys;fi' % (request.user.username,public_key)
+            cmd = 'mkdir -p /root/.ssh;if ! grep %s /root/.ssh/authorized_keys;then echo "%s" >> /root/.ssh/authorized_keys;fi' % (request.user.username,public_key)
             server_groups = server_group_list.objects.all()
             for i in server_groups:
                 for j in i.members_server.split(','):

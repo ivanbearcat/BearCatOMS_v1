@@ -120,6 +120,7 @@ var server_password_new = $('#server_password_new').val()
 var server_password_new_again = $('#server_password_new_again').val()
 showAjaxLoad()
 $.post('/post_server_chpasswd/', {server_password_current:server_password_current,server_password_new:server_password_new,server_password_new_again:server_password_new_again}, function (d) {
+            hideAjaxLoad()
             if (d.code == 0) {
                 toastr.success(d.msg)
             } else {
@@ -129,7 +130,6 @@ $.post('/post_server_chpasswd/', {server_password_current:server_password_curren
 $('#server_password_current').val('')
 $('#server_password_new').val('')
 $('#server_password_new_again').val('')
-hideAjaxLoad()
 };
 
 function reset(){
