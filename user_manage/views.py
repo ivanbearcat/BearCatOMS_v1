@@ -4,7 +4,7 @@ from django.http import HttpResponseRedirect,HttpResponse
 from django.utils.log import logger
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-import simplejson,re,datetime,os,pexpect,time
+import simplejson,re,datetime,os,pexpect,time,commands
 from user_manage.models import perm
 from operation.models import server_group_list
 from django.db.models.query_utils import Q
@@ -62,8 +62,6 @@ def post_server_chpasswd(request):
     three_months_later = datetime.datetime.now()+datetime.timedelta(91)
     aes = crypt.crypt_aes(SECRET_KEY[:32])
     orm_server_password = aes.decrypt_aes(orm.server_password)
-    print server_password_current
-    print orm_server_password
     if server_password_current != orm_server_password:
         code = 1
         msg = u'当前密码错误'
@@ -93,9 +91,9 @@ def post_server_chpasswd(request):
                 code = os.system('usermod -e $(date "+%D" -d "+3 months") ' + request.user.username + ' && echo ' + server_password_new_again + '|passwd --stdin ' + request.user.username)
                 if code:
                     return HttpResponse(simplejson.dumps({'code':code,'msg':'密码修改失败'}),content_type="application/json")
-            # for i in server_lists.values():
-            with open('/home/%s/.ssh/id_rsa.pub' % request.user.username) as f:
-                public_key = f.readline()
+            # with open('/home/%s/.ssh/id_rsa.pub' % request.user.username) as f:
+            #     public_key = f.readline()
+            public_key = commands.getoutput('cat /home/%s/.ssh/id_rsa.pub' % request.user.username)
             cmd = 'mkdir -p /root/.ssh;if ! grep %s /root/.ssh/authorized_keys;then echo "%s" >> /root/.ssh/authorized_keys;fi' % (request.user.username,public_key)
             server_groups = server_group_list.objects.all()
             for i in server_groups:
@@ -110,7 +108,6 @@ def post_server_chpasswd(request):
             code = 0
             msg = u'密码修改成功'
         except Exception,e:
-            print e
             code = 5
             msg = u'密码修改失败'
     return HttpResponse(simplejson.dumps({'code':code,'msg':msg}),content_type="application/json")
