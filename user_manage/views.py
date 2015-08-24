@@ -11,8 +11,11 @@ from django.db.models.query_utils import Q
 from BearCatOMS.settings import BASE_DIR,SECRET_KEY,CENTER_SERVER
 from libs import crypt
 from libs.check_perm import check_permission
-from libs.server_list_conf import server_lists
 from libs.socket_send_data import client_send_data
+from gevent import monkey; monkey.patch_socket()
+import gevent
+from gevent.pool import Pool
+
 
 
 @login_required
@@ -96,10 +99,16 @@ def post_server_chpasswd(request):
             public_key = commands.getoutput('cat /home/%s/.ssh/id_rsa.pub' % request.user.username)
             cmd = 'mkdir -p /root/.ssh;if ! grep %s /root/.ssh/authorized_keys;then echo "%s" >> /root/.ssh/authorized_keys;fi' % (request.user.username,public_key)
             server_groups = server_group_list.objects.all()
-            for i in server_groups:
-                for j in i.members_server.split(','):
-                    client_send_data("{'salt':1,'act':'cmd.run','hosts':'%s','argv':%s}" % (j,cmd.split(',')),CENTER_SERVER[i.server_group_name][0],CENTER_SERVER[i.server_group_name][1])
+            def gevent_run_all(server_groups,p,client_send_data,cmd,CENTER_SERVER):
+                for i in server_groups:
+                    for j in i.members_server.split(','):
+                        p.spawn(gevent_run,client_send_data,i,j,cmd,CENTER_SERVER)
+            def gevent_run(client_send_data,i,j,cmd,CENTER_SERVER):
+                client_send_data("{'salt':1,'act':'cmd.run','hosts':'%s','argv':%s}" % (j,cmd.split(',')),CENTER_SERVER[i.server_group_name][0],CENTER_SERVER[i.server_group_name][1])
 #                    os.system('ssh-copy-id -i /home/%s/.ssh/id_rsa.pub root@%s' % (request.user.username,j))
+            p = Pool()
+            p.spawn(gevent_run_all,server_groups,p,client_send_data,cmd,CENTER_SERVER)
+            p.join()
             if os.system('grep logout /home/%s/.bashrc'% request.user.username):
                 os.system('echo "python %s %s" >> /home/%s/.bashrc && echo "logout" >> /home/%s/.bashrc' % (BASE_DIR + '/fortress_server.py',request.user.username,request.user.username,request.user.username))
             orm.server_password = server_password_new

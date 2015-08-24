@@ -16,7 +16,6 @@ from libs.check_perm import check_permission
 import threading
 from gevent import monkey; monkey.patch_socket()
 import gevent
-# from gevent.queue import Queue
 from gevent.pool import Pool
 
 @login_required
@@ -346,11 +345,8 @@ def search_server_list(request):
                     i.status = 0
                     i.save()
         p = Pool()
-        start = time.time()
         p.spawn(gevent_run_all,CENTER_SERVER,client_send_data,server_list,p)
         p.join()
-        end = time.time()
-        print end - start
         return HttpResponse(simplejson.dumps({'code':0,'msg':u'获取完成'}),content_type="application/json")
     except Exception,e:
         logger.error(e)
