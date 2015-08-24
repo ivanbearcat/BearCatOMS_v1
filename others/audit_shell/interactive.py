@@ -31,14 +31,14 @@ except ImportError:
     has_termios = False
 
 
-def interactive_shell(chan,web_username,source_ip):
+def interactive_shell(chan,web_username,hostname):
     if has_termios:
-        posix_shell(chan,web_username,source_ip)
+        posix_shell(chan,web_username,hostname)
     else:
         windows_shell(chan)
 
 
-def posix_shell(chan,web_username,source_ip):
+def posix_shell(chan,web_username,hostname):
     import select
     with open('/home/%s/.tempfile' % web_username) as f:
         DATABASES = f.readline()
@@ -87,7 +87,7 @@ def posix_shell(chan,web_username,source_ip):
             if x == '\r':
                 cmd = ''.join(record)
                 time_now = datetime.datetime.now().strftime('%F %X')
-                cur.execute('insert into audit_log (source_ip,username,command,time) values("%s","%s","%s","%s")' % (source_ip,web_username,cmd,time_now))
+                cur.execute('insert into audit_log (source_ip,username,command,time) values("%s","%s","%s","%s")' % (hostname,web_username,cmd,time_now))
                 record = []
 
     finally:

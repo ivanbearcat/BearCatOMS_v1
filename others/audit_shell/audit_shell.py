@@ -54,7 +54,7 @@ def agent_auth(transport, username):
             print '... nope.'
 
 
-def manual_auth(username, hostname, web_username):
+def manual_auth(username, remote_ip, web_username):
 #    default_auth = 'p'
 #    auth = raw_input('Auth by (p)assword, (r)sa key, or (d)ss key? [%s] ' % default_auth)
 #    if len(auth) == 0:
@@ -89,32 +89,34 @@ def manual_auth(username, hostname, web_username):
 
 # setup logging
 
-if len(sys.argv) < 3:
+if len(sys.argv) < 4:
     print 'not enough argv!'
     sys.exit(1)
 else:
     web_username = sys.argv[2]
+    hostname = sys.argv[3]
+
 #paramiko.util.log_to_file('audit_shell.log')
 
 username = ''
 if len(sys.argv) > 1:
-    hostname = sys.argv[1]
-    if hostname.find('@') >= 0:
-        username, hostname = hostname.split('@')
+    remote_ip = sys.argv[1]
+    if remote_ip.find('@') >= 0:
+        username, remote_ip = remote_ip.split('@')
 else:
-    hostname = raw_input('Hostname: ')
-if len(hostname) == 0:
+    remote_ip = raw_input('Hostname: ')
+if len(remote_ip) == 0:
     print '*** Hostname required.'
     sys.exit(1)
 port = 22
-if hostname.find(':') >= 0:
-    hostname, portstr = hostname.split(':')
+if remote_ip.find(':') >= 0:
+    remote_ip, portstr = remote_ip.split(':')
     port = int(portstr)
 
 # now connect
 try:
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect((hostname, port))
+    sock.connect((remote_ip, port))
 except Exception, e:
     print '*** Connect failed: ' + str(e)
 #    traceback.print_exc()
@@ -139,11 +141,11 @@ try:
 
     # check server's host key -- this is important.
     key = t.get_remote_server_key()
-    if not keys.has_key(hostname):
+    if not keys.has_key(remote_ip):
         print '*** WARNING: Unknown host key!'
-    elif not keys[hostname].has_key(key.get_name()):
+    elif not keys[remote_ip].has_key(key.get_name()):
         print '*** WARNING: Unknown host key!'
-    elif keys[hostname][key.get_name()] != key:
+    elif keys[remote_ip][key.get_name()] != key:
         print '*** WARNING: Host key has changed!!!'
         sys.exit(1)
     else:
@@ -159,7 +161,7 @@ try:
 
     agent_auth(t, username)
     if not t.is_authenticated():
-        manual_auth(username, hostname, web_username)
+        manual_auth(username, remote_ip, web_username)
     if not t.is_authenticated():
         print '*** Authentication failed. :('
         t.close()

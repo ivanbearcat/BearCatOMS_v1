@@ -54,7 +54,7 @@ while 1:
         conn.commit()
         cur.close()
         conn.close()
-        os.system('python %s/others/audit_shell/audit_shell.py %s %s' % (BASE_DIR,i,username))
+        os.system('python %s/others/audit_shell/audit_shell.py %s %s %s' % (BASE_DIR,i,username,hostname))
     except Exception:
         continue
     except KeyboardInterrupt:
