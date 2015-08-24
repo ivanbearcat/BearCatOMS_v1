@@ -5,7 +5,7 @@ from django.utils.log import logger
 from django.contrib.auth.decorators import login_required
 import simplejson,re,os,datetime,time,subprocess
 from django.db.models.query_utils import Q
-from operation.models import upload_files,server_list,server_group_list
+from operation.models import upload_files,server_list,server_group_list,command_template
 from audit.models import log
 from user_manage.models import perm
 from django import forms
@@ -13,7 +13,6 @@ from libs.socket_send_data import client_send_data
 from libs.str_to_html import convert_str_to_html
 from BearCatOMS.settings import BASE_DIR,CENTER_SERVER
 from libs.check_perm import check_permission
-import threading
 from gevent import monkey; monkey.patch_socket()
 import gevent
 from gevent.pool import Pool
@@ -249,6 +248,94 @@ def password_expire(request):
     else:
         return HttpResponse(simplejson.dumps({'code':1}),content_type="application/json")
 
+@login_required
+def cmd_template(request):
+    flag = check_permission(u'命令模板',request.user.username)
+    if flag < 1:
+        return render_to_response('public/no_passing.html')
+    path = request.path.split('/')[1]
+    return render_to_response('operation/cmd_template.html',{'user':request.user.username,
+                                                           'path1':'operation',
+                                                           'path2':path,
+                                                           'page_name1':u'运维操作',
+                                                           'page_name2':u'命令模板'})
+
+def cmd_template_data(request):
+    sEcho =  request.POST.get('sEcho') #标志，直接返回
+    iDisplayStart = int(request.POST.get('iDisplayStart'))#第几行开始
+    iDisplayLength = int(request.POST.get('iDisplayLength'))#显示多少行
+    iSortCol_0 = int(request.POST.get("iSortCol_0"))#排序行号
+    sSortDir_0 = request.POST.get('sSortDir_0')#asc/desc
+    sSearch = request.POST.get('sSearch')#高级搜索
+
+    aaData = []
+    sort = ['description','cmd']
+
+    if  sSortDir_0 == 'asc':
+        if sSearch == '':
+            result_data = command_template.objects.all().order_by(sort[iSortCol_0])[iDisplayStart:iDisplayStart+iDisplayLength]
+            iTotalRecords = command_template.objects.all().count()
+        else:
+            result_data = command_template.objects.filter(Q(description__contains=sSearch) | \
+                                               Q(cmd__contains=sSearch)) \
+                                            .order_by(sort[iSortCol_0])[iDisplayStart:iDisplayStart+iDisplayLength]
+            iTotalRecords = command_template.objects.filter(Q(description__contains=sSearch) | \
+                                                 Q(cmd__contains=sSearch)).count()
+    else:
+        if sSearch == '':
+            result_data = command_template.objects.all().order_by(sort[iSortCol_0]).reverse()[iDisplayStart:iDisplayStart+iDisplayLength]
+            iTotalRecords = command_template.objects.all().count()
+        else:
+            result_data = command_template.objects.filter(Q(description__contains=sSearch) | \
+                                               Q(cmd__contains=sSearch)) \
+                                            .order_by(sort[iSortCol_0]).reverse()[iDisplayStart:iDisplayStart+iDisplayLength]
+            iTotalRecords = command_template.objects.filter(Q(description__contains=sSearch) | \
+                                                 Q(cmd__contains=sSearch)).count()
+
+    for i in  result_data:
+        aaData.append({
+                       '0':i.description,
+                       '1':i.cmd,
+                       '2':i.id
+                      })
+    result = {'sEcho':sEcho,
+               'iTotalRecords':iTotalRecords,
+               'iTotalDisplayRecords':iTotalRecords,
+               'aaData':aaData
+    }
+    return HttpResponse(simplejson.dumps(result),content_type="application/json")
+
+@login_required
+def cmd_template_save(request):
+    _id = request.POST.get('id')
+    comment = request.POST.get('comment')
+    server_group_name = request.POST.get('server_group_name')
+    members_server = request.POST.get('members_server')
+
+    try:
+        if _id =='':
+            server_group_list.objects.create(server_group_name=server_group_name,members_server=members_server,comment=comment)
+        else:
+            orm = server_group_list.objects.get(id=_id)
+            orm.server_group_name = server_group_name
+            orm.members_server = members_server
+            orm.comment = comment
+            orm.save()
+        return HttpResponse(simplejson.dumps({'code':0,'msg':u'保存成功'}),content_type="application/json")
+    except Exception,e:
+        logger.error(e)
+        return HttpResponse(simplejson.dumps({'code':1,'msg':str(e)}),content_type="application/json")
+
+@login_required
+def cmd_template_del(request):
+    try:
+        _id = request.POST.get('id')
+        orm = command_template.objects.get(id=_id)
+        orm.delete()
+        return HttpResponse(simplejson.dumps({'code':0,'msg':u'删除成功'}),content_type="application/json")
+    except Exception,e:
+        logger.error(e)
+        return HttpResponse(simplejson.dumps({'code':1,'msg':u'删除失败'}),content_type="application/json")
 
 @login_required
 def get_server_list(request):
