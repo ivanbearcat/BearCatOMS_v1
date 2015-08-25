@@ -12,14 +12,14 @@ with open('/home/%s/.tempfile' % username,'w') as f:
 try:
     conn=MySQLdb.connect(host=DATABASES.values()[0]['HOST'],user=DATABASES.values()[0]['USER'],passwd=DATABASES.values()[0]['PASSWORD'],db=DATABASES.values()[0]['NAME'],port=3306,charset="utf8")
     cur=conn.cursor()
-    cur.execute('select server_groups from user_manage_perm where username="%s"' % username)
+    cur.execute('select server_groups from perm_manage_perm where username="%s"' % username)
     data = cur.fetchall()
     for i in data:
         for j in i:
             for n in j.split(','):
                 server_groups.append(n)
     for i in server_groups:
-        cur.execute('select members_server from operation_server_group_list where server_group_name="%s"' % i)
+        cur.execute('select members_server from perm_manage_server_group_list where server_group_name="%s"' % i)
         data = cur.fetchall()
         for j in  data:
             for n in j:

@@ -3,9 +3,11 @@ from login.views import login,login_auth,logout,not_login
 from main.views import main
 from monitor.views import nagios,zabbix
 from user_manage.views import *
+from perm_manage.views import *
 from assets.views import *
 from audit.views import *
 from operation.views import *
+from saltstack.views import *
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -75,4 +77,9 @@ urlpatterns = patterns('',
     url(r'^rsync_dest_dropdown/', rsync_dest_dropdown),
     url(r'^fortress_server/', fortress_server),
     url(r'^server_del/', server_del),
+    url(r'^salt_state/', salt_state),
+    url(r'^salt_state_data/', salt_state_data),
+    url(r'^salt_state_save/', salt_state_save),
+    url(r'^salt_state_dropdown/', salt_state_dropdown),
+    url(r'^salt_state_del/', salt_state_del),
 )

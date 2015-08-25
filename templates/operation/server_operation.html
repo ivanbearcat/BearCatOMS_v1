@@ -394,37 +394,5 @@ function del() {
     }
 }
 
-
-{#function sync_password() {#}
-{#    showAjaxLoad()#}
-{#    $.post('/sync_password/', {}, function (d) {#}
-{#            hideAjaxLoad()#}
-{#            if (d.code == 0) {#}
-{#                toastr.success(d.msg)#}
-{#            } else {#}
-{#                toastr.error(d.msg)#}
-{#            }#}
-{#        })#}
-{#}#}
-
-{#function login_server() {#}
-{#    var oTT = TableTools.fnGetInstance('datatables');#}
-{#    var aData = oTT.fnGetSelectedData();#}
-{#    if (aData.length != 0) {#}
-{#        var server_ips = []#}
-{#        for(var i in aData) {#}
-{#            server_ips.push(aData[i][1])#}
-{#            server_ips = server_ips.join(',')#}
-{#            $.post('/login_server/', {server_ips: server_ips}, function (d) {#}
-{#                if (d.code == 0) {#}
-{#                    toastr.success(d.msg)#}
-{#                } else {#}
-{#                    toastr.error(d.msg)#}
-{#                }#}
-{#            })#}
-{#        }#}
-{#    }#}
-{#}#}
-
 </script>
 {% endblock %}

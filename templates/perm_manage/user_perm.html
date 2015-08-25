@@ -118,29 +118,29 @@
                             </div>
                         </div>
                     </div>
-                        <div class="form-group">
-                            <label class="col-sm-4 control-label">服务器密码</label>
-
-                            <div class="col-sm-8">
-                                <div class="input-group">
-                                                                <span class="twitter-typeahead"
-                                                                      style="position: relative; display: inline-block;">
-                                                                    <input type="text" class="form-control tt-hint"
-                                                                           disabled="" autocomplete="off" spellcheck="false"
-                                                                           style="position: absolute; top: 0px; left: 0px; border-color: transparent; box-shadow: none; background: none 0% 0% / auto repeat scroll padding-box border-box rgb(255, 255, 255);">
-                                                                    <input type="password" id="server_password"
-                                                                           name="typeahead_example_modal_1"
-                                                                           class="form-control tt-input" autocomplete="off"
-                                                                           spellcheck="false" dir="auto"
-                                                                           style="width: 250px;position: relative; vertical-align: top; background-color: transparent;"><pre
-                                                                        aria-hidden="true"
-                                                                        style="position: absolute; visibility: hidden; white-space: nowrap; font-family: 'Open Sans', sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 400; word-spacing: 0px; letter-spacing: 0px; text-indent: 0px; text-rendering: auto; text-transform: none;"></pre><span
-                                                                        class="tt-dropdown-menu"
-                                                                        style="position: absolute; top: 100%; left: 0px; z-index: 100; display: none;"><div
-                                                                        class="tt-dataset-1"></div></span></span>
-                                </div>
-                            </div>
-                        </div>
+{#                        <div class="form-group">#}
+{#                            <label class="col-sm-4 control-label">服务器密码</label>#}
+{##}
+{#                            <div class="col-sm-8">#}
+{#                                <div class="input-group">#}
+{#                                                                <span class="twitter-typeahead"#}
+{#                                                                      style="position: relative; display: inline-block;">#}
+{#                                                                    <input type="text" class="form-control tt-hint"#}
+{#                                                                           disabled="" autocomplete="off" spellcheck="false"#}
+{#                                                                           style="position: absolute; top: 0px; left: 0px; border-color: transparent; box-shadow: none; background: none 0% 0% / auto repeat scroll padding-box border-box rgb(255, 255, 255);">#}
+{#                                                                    <input type="password" id="server_password"#}
+{#                                                                           name="typeahead_example_modal_1"#}
+{#                                                                           class="form-control tt-input" autocomplete="off"#}
+{#                                                                           spellcheck="false" dir="auto"#}
+{#                                                                           style="width: 250px;position: relative; vertical-align: top; background-color: transparent;"><pre#}
+{#                                                                        aria-hidden="true"#}
+{#                                                                        style="position: absolute; visibility: hidden; white-space: nowrap; font-family: 'Open Sans', sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 400; word-spacing: 0px; letter-spacing: 0px; text-indent: 0px; text-rendering: auto; text-transform: none;"></pre><span#}
+{#                                                                        class="tt-dropdown-menu"#}
+{#                                                                        style="position: absolute; top: 100%; left: 0px; z-index: 100; display: none;"><div#}
+{#                                                                        class="tt-dataset-1"></div></span></span>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
                         <div class="form-group last">
                         <label class="col-sm-4 control-label">主机组</label>
 
@@ -324,7 +324,7 @@ function rule_save() {
     }
     server_groups = server_groups_list.join(',')
     var name = $('#name').val();
-    var server_password = $('#server_password').val();
+{#    var server_password = $('#server_password').val();#}
     var id = $('#id').val();
     if (username == '') {
         toastr.error('不能为空')
@@ -342,7 +342,7 @@ function rule_save() {
             username: username,
             name: name,
             web_perm: web_perm,
-            server_password: server_password,
+{#            server_password: server_password,#}
             server_groups: server_groups
         },
         success: function (d) {
@@ -389,7 +389,7 @@ function add() {
         });
     })
     $('#name').val("")
-    $('#server_password').val("")
+{#    $('#server_password').val("")#}
     $("#myModal").modal('show')
 }
 function edit() {
@@ -403,10 +403,10 @@ function edit() {
         var id = aData[0][6];
         $.post('/user_perm_dropdown/', {id: id,server_groups: server_groups,web_perm: web_perm}, function (d) {
             $('#username').select2({
-            multiple: false,
-            placeholder: '请选择用户名',
-            allowClear: true,
-            data: d['username_list']
+                multiple: false,
+                placeholder: '请选择用户名',
+                allowClear: true,
+                data: d['username_list']
             });
             $('#web_perm').select2({
                 multiple: true,

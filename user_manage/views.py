@@ -5,9 +5,7 @@ from django.utils.log import logger
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 import simplejson,re,datetime,os,pexpect,time,commands
-from user_manage.models import perm
-from operation.models import server_group_list
-from django.db.models.query_utils import Q
+from perm_manage.models import server_group_list,perm
 from BearCatOMS.settings import BASE_DIR,SECRET_KEY,CENTER_SERVER
 from libs import crypt
 from libs.check_perm import check_permission
@@ -104,7 +102,7 @@ def post_server_chpasswd(request):
                     for j in i.members_server.split(','):
                         p.spawn(gevent_run,client_send_data,i,j,cmd,CENTER_SERVER)
             def gevent_run(client_send_data,i,j,cmd,CENTER_SERVER):
-                client_send_data("{'salt':1,'act':'cmd.run','hosts':'%s','argv':%s}" % (j,cmd.split(',')),CENTER_SERVER[i.server_group_name][0],CENTER_SERVER[i.server_group_name][1])
+                client_send_data("{'salt':1,'act':'cmd.run','hosts':'%s','argv':%s}" % (j,cmd.split(',,')),CENTER_SERVER[i.server_group_name][0],CENTER_SERVER[i.server_group_name][1])
 #                    os.system('ssh-copy-id -i /home/%s/.ssh/id_rsa.pub root@%s' % (request.user.username,j))
             p = Pool()
             p.spawn(gevent_run_all,server_groups,p,client_send_data,cmd,CENTER_SERVER)
@@ -120,160 +118,3 @@ def post_server_chpasswd(request):
             code = 5
             msg = u'密码修改失败'
     return HttpResponse(simplejson.dumps({'code':code,'msg':msg}),content_type="application/json")
-
-@login_required
-def user_perm(request):
-    if not request.user.is_superuser:
-        return render_to_response('public/no_passing.html')
-    path = request.path.split('/')[1]
-    return render_to_response('user_manage/user_perm.html',{'user':request.user.username,
-                                                           'path1':'user_manage',
-                                                           'path2':path,
-                                                           'page_name1':u'用户管理',
-                                                           'page_name2':u'用户权限管理',})
-
-@login_required
-def user_perm_data(request):
-    sEcho =  request.POST.get('sEcho') #标志，直接返回
-    iDisplayStart = int(request.POST.get('iDisplayStart'))#第几行开始
-    iDisplayLength = int(request.POST.get('iDisplayLength'))#显示多少行
-    iSortCol_0 = int(request.POST.get("iSortCol_0"))#排序行号
-    sSortDir_0 = request.POST.get('sSortDir_0')#asc/desc
-    sSearch = request.POST.get('sSearch')#高级搜索
-
-    aaData = []
-    sort = ['username','name',None,None,'server_groups','server_password_expire']
-
-    if  sSortDir_0 == 'asc':
-        if sSearch == '':
-            result_data = perm.objects.all().order_by(sort[iSortCol_0])[iDisplayStart:iDisplayStart+iDisplayLength]
-            iTotalRecords = perm.objects.all().count()
-        else:
-            result_data = perm.objects.filter(Q(username__contains=sSearch) | \
-                                               Q(name__contains=sSearch) | \
-                                               Q(web_perm__contains=sSearch) | \
-                                               Q(server_groups__contains=sSearch)) \
-                                            .order_by(sort[iSortCol_0])[iDisplayStart:iDisplayStart+iDisplayLength]
-            iTotalRecords = perm.objects.filter(Q(username__contains=sSearch) | \
-                                                 Q(name__contains=sSearch) | \
-                                                 Q(web_perm__contains=sSearch) | \
-                                                 Q(server_groups__contains=sSearch)).count()
-    else:
-        if sSearch == '':
-            result_data = perm.objects.all().order_by(sort[iSortCol_0]).reverse()[iDisplayStart:iDisplayStart+iDisplayLength]
-            iTotalRecords = perm.objects.all().count()
-        else:
-            result_data = perm.objects.filter(Q(username__contains=sSearch) | \
-                                               Q(name__contains=sSearch) | \
-                                               Q(web_perm__contains=sSearch) | \
-                                               Q(server_groups__contains=sSearch)) \
-                                            .order_by(sort[iSortCol_0]).reverse()[iDisplayStart:iDisplayStart+iDisplayLength]
-            iTotalRecords = perm.objects.filter(Q(username__contains=sSearch) | \
-                                                 Q(name__contains=sSearch) | \
-                                                 Q(web_perm__contains=sSearch) | \
-                                                 Q(server_groups__contains=sSearch)).count()
-
-    for i in  result_data:
-        aaData.append({
-                       '0':i.username,
-                       '1':i.name,
-                       '2':i.web_perm,
-                       '3':i.server_password,
-                       '4':str(i.server_password_expire),
-                       '5':i.server_groups,
-                       '6':i.id,
-                      })
-    result = {'sEcho':sEcho,
-               'iTotalRecords':iTotalRecords,
-               'iTotalDisplayRecords':iTotalRecords,
-               'aaData':aaData
-    }
-    return HttpResponse(simplejson.dumps(result),content_type="application/json")
-
-@login_required
-def user_perm_dropdown(request):
-    _id = request.POST.get('id')
-    server_groups = request.POST.get('server_groups')
-    web_perm = request.POST.get('web_perm')
-    result = {}
-    result['username_list'] = []
-    result['username_edit'] = ''
-    result['web_perm_list'] = []
-    result['web_perm_edit'] = []
-    result['server_groups_list'] = []
-    result['server_groups_edit'] = []
-    count = 0
-    if not _id == None:
-        orm = perm.objects.get(id=_id)
-        result['username_edit'] = {'text':orm.username}
-        if web_perm:
-            for i in orm.web_perm.split(','):
-                result['web_perm_edit'].append({'text':i,'id':count})
-                count += 1
-        if server_groups:
-            for i in orm.server_groups.split(','):
-                orm_server_groups = server_group_list.objects.get(server_group_name=i)
-                result['server_groups_edit'].append({'text':i,'id':orm_server_groups.id})
-    orm_User = User.objects.all()
-    for i in orm_User:
-        result['username_list'].append({'text':i.username,'id':i.id})
-    sidebar_list = []
-    sidebar_list.append('所有权限')
-    with open(BASE_DIR + '/templates/public/sidebar.html') as f:
-        line = f.readline()
-        while line:
-            data = re.search(r'name=".*"',line)
-            if data:
-                data = data.group().replace('"','')
-                sidebar_list.append(data.replace('name=',''))
-            line = f.readline()
-    for i in sidebar_list:
-        result['web_perm_list'].append({'text':i,'id':count})
-        count += 1
-    orm_server_group = server_group_list.objects.all()
-    for i in orm_server_group:
-        result['server_groups_list'].append({'text':i.server_group_name,'id':i.id})
-    return HttpResponse(simplejson.dumps(result),content_type="application/json")
-
-@login_required
-def user_perm_save(request):
-    _id = request.POST.get('id')
-    username = request.POST.get('username')
-    name = request.POST.get('name')
-    web_perm = request.POST.get('web_perm')
-    server_password = request.POST.get('server_password')
-    server_groups = request.POST.get('server_groups')
-    three_months_later = datetime.datetime.now()+datetime.timedelta(91)
-    aes = crypt.crypt_aes(SECRET_KEY[:32])
-    server_password = aes.encrypt_aes(server_password)
-    try:
-        if _id =='':
-            if server_password:
-                perm.objects.create(username=username,name=name,web_perm=web_perm,server_password=server_password,server_groups=server_groups,\
-                                    server_password_expire=three_months_later.strftime('%Y-%m-%d'))
-            else:
-                perm.objects.create(username=username,name=name,web_perm=web_perm,server_password=server_password,server_groups=server_groups)
-
-        else:
-            orm = perm.objects.get(id=_id)
-            orm.username = username
-            orm.name = name
-            orm.web_perm = web_perm
-            if server_password:
-                orm.server_password = server_password
-            orm.server_groups = server_groups
-            orm.save()
-        return HttpResponse(simplejson.dumps({'code':0,'msg':u'保存成功'}),content_type="application/json")
-    except Exception,e:
-        logger.error(e)
-        return HttpResponse(simplejson.dumps({'code':1,'msg':str(e)}),content_type="application/json")
-
-@login_required
-def user_perm_del(request):
-    _id = request.POST.get('id')
-    try:
-        orm = perm.objects.get(id=_id)
-        orm.delete()
-        return HttpResponse(simplejson.dumps({'code':0,'msg':u'删除成功'}),content_type="application/json")
-    except Exception,e:
-        return HttpResponse(simplejson.dumps({'code':1,'msg':e}),content_type="application/json")

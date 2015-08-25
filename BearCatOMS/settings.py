@@ -131,10 +131,11 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     # 'debugtools',
-    'user_manage',
+    'perm_manage',
     'assets',
     'audit',
     'operation',
+    'saltstack',
 )
 
 # A sample logging configuration. The only tangible logging

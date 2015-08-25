@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #coding:utf-8
-from user_manage.models import perm
+from perm_manage.models import perm
 from django.utils.log import logger
 
 

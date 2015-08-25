@@ -15,11 +15,6 @@ class server_list(models.Model):
     belong_to = models.CharField(verbose_name='属于哪个服务器', max_length=64, blank=False)
     status = models.BooleanField(verbose_name='状态')
 
-class server_group_list(models.Model):
-    server_group_name = models.CharField(verbose_name='服务器组名', max_length=32, blank=False, unique=True)
-    members_server = models.CharField(verbose_name='成员服务器', max_length=512, blank=False)
-    comment = comment = models.CharField(verbose_name='备注', max_length=128)
-
 class command_template(models.Model):
     description = models.CharField(verbose_name='描述', max_length=32, blank=False, unique=True)
     cmd = models.CharField(verbose_name='命令', max_length=1024, blank=False)

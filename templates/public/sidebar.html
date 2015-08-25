@@ -20,17 +20,32 @@
 					<ul class="sub-menu">
 						<li id="chpasswd">
 							<a href="/chpasswd/" name="修改密码">
-								<i class="fa"></i>
 								修改密码
 							</a>
 						</li>
+                	</ul>
+				</li>
+                <li id="perm_manage">
+					<a href="javascript:;">
+						<i class="fa fa-key"></i>
+						<span class="title">
+							权限管理
+						</span>
+						<span class="arrow ">
+						</span>
+					</a>
+                    <ul class="sub-menu">
                         <li id="user_perm">
 							<a href="/user_perm/">
-								<i class="fa"></i>
 								用户权限管理
 							</a>
 						</li>
-					</ul>
+                        <li id="server_group">
+							<a href="/server_group/">
+                                服务器组管理
+							</a>
+						</li>
+                    </ul>
 				</li>
 				<li id="assets">
 					<a href="javascript:;">
@@ -121,11 +136,6 @@
 						</span>
 					</a>
 					<ul class="sub-menu">
-                        <li id="server_group">
-							<a href="/server_group/">
-								 服务器组管理
-							</a>
-						</li>
 						<li id="upload">
 							<a href="/upload/" name="上传文件">
 								 上传文件
@@ -144,6 +154,28 @@
                         <li id="fortress_server">
 							<a href="/fortress_server/" name="堡垒机">
 								 堡垒机
+							</a>
+						</li>
+					</ul>
+				</li>
+                <li id="saltstack">
+					<a href="javascript:;">
+						<i class="fa fa-sitemap"></i>
+						<span class="title">
+							saltstack
+						</span>
+						<span class="arrow ">
+						</span>
+					</a>
+					<ul class="sub-menu">
+						<li id="salt_top">
+							<a href="/salt_top/" name="state模块对应">
+								 state模块对应
+							</a>
+						</li>
+                        <li id="salt_state">
+							<a href="/salt_state/" name="state模块定义">
+								 state模块定义
 							</a>
 						</li>
 					</ul>
