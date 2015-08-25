@@ -293,9 +293,13 @@ def cmd_template_data(request):
                                                  Q(cmd__contains=sSearch)).count()
 
     for i in  result_data:
+        cmd = []
+        for j in i.cmd.split('\n'):
+            cmd.append(j+'<br>')
+            print cmd
         aaData.append({
                        '0':i.description,
-                       '1':i.cmd,
+                       '1':''.join(cmd),
                        '2':i.id
                       })
     result = {'sEcho':sEcho,
@@ -308,23 +312,29 @@ def cmd_template_data(request):
 @login_required
 def cmd_template_save(request):
     _id = request.POST.get('id')
-    comment = request.POST.get('comment')
-    server_group_name = request.POST.get('server_group_name')
-    members_server = request.POST.get('members_server')
+    description = request.POST.get('description')
+    cmd = request.POST.get('cmd')
 
     try:
         if _id =='':
-            server_group_list.objects.create(server_group_name=server_group_name,members_server=members_server,comment=comment)
+            command_template.objects.create(description=description,cmd=cmd)
         else:
-            orm = server_group_list.objects.get(id=_id)
-            orm.server_group_name = server_group_name
-            orm.members_server = members_server
-            orm.comment = comment
+            orm = command_template.objects.get(id=_id)
+            orm.description = description
+            orm.cmd = cmd
             orm.save()
         return HttpResponse(simplejson.dumps({'code':0,'msg':u'保存成功'}),content_type="application/json")
     except Exception,e:
         logger.error(e)
         return HttpResponse(simplejson.dumps({'code':1,'msg':str(e)}),content_type="application/json")
+
+@login_required
+def cmd_template_dropdown(request):
+    result = []
+    orm = command_template.objects.all()
+    for i in orm:
+        result.append({'text':i.description,'id':i.id})
+    return HttpResponse(simplejson.dumps(result),content_type="application/json")
 
 @login_required
 def cmd_template_del(request):
@@ -447,6 +457,8 @@ def run_cmd(request):
         server_names = server_names.split(',')
         belong_tos = belong_tos.split(',')
         cmd = request.POST.get('cmd')
+        cmd_template = request.POST.get('cmd_template')
+
         time_now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         servers = {}
         cmd_results = ''
@@ -456,12 +468,23 @@ def run_cmd(request):
             servers[i[1]].append(i[0])
         for k,v in servers.items():
             v = ','.join(v)
-            cmd_result = client_send_data("{'salt':1,'act':'cmd.run','hosts':'%s','argv':%s}" % (v,cmd.split(',')),CENTER_SERVER[k][0],CENTER_SERVER[k][1])
-            cmd_result = convert_str_to_html(cmd_result)
-            if cmd_results:
-                cmd_results = cmd_result
-            else:
-                cmd_results = cmd_results + '<br><br><br><br>' + cmd_result
+            if cmd:
+                cmd_result = client_send_data("{'salt':1,'act':'cmd.run','hosts':'%s','argv':%s}" % (v,cmd.split(',,')),CENTER_SERVER[k][0],CENTER_SERVER[k][1])
+                cmd_result = convert_str_to_html(cmd_result)
+                if cmd_results:
+                    cmd_results = cmd_result
+                else:
+                    cmd_results = cmd_results + '<br><br><br><br>' + cmd_result
+            if cmd_template:
+                orm = command_template.objects.get(description=cmd_template)
+                command = 'echo "%s" > /tmp/tempfile && bash /tmp/tempfile;rm -rf /tmp/tempfile' % orm.cmd
+                cmd_result = client_send_data("{'salt':1,'act':'cmd.run','hosts':'%s','argv':%s}" % (v,command.split(',,')),CENTER_SERVER[k][0],CENTER_SERVER[k][1])
+                cmd_result = convert_str_to_html(cmd_result)
+                if cmd_results:
+                    cmd_results = cmd_result
+                else:
+                    cmd_results = cmd_results + '<br><br><br><br>' + cmd_result
+                cmd = u'模板 < %s >' % cmd_template
         for i in server_names:
             log.objects.create(source_ip=i,username=request.user.username,command=cmd,time=time_now)
         return HttpResponse(simplejson.dumps({'code':0,'msg':u'完成执行完成','cmd_results':cmd_results}),content_type="application/json")

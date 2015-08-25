@@ -399,7 +399,6 @@ function edit() {
     if (aData.length == 1) {
         var name = aData[0][1];
         var web_perm = aData[0][2];
-        var server_password = aData[0][3];
         var server_groups = aData[0][5];
         var id = aData[0][6];
         $.post('/user_perm_dropdown/', {id: id,server_groups: server_groups,web_perm: web_perm}, function (d) {

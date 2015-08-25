@@ -92,6 +92,33 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="myModal2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                <h4 class="modal-title"></h4>
+            </div>
+            <div class="modal-body form">
+                <form action="#" class="form-horizontal form-row-seperated">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label" style="text-align:center;width:100%"><h4>您确定要执行吗</h4></label>
+                        <div class="col-sm-8">
+                            <div class="input-group">
+                                <span class="twitter-typeahead"
+                                      style="position: relative; display: inline-block;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" onclick="run_cmd()"><i class="fa fa-check"></i>确定</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!--/datatables-->
 {% endblock %}
@@ -126,12 +153,17 @@ $(document).ready(function () {
         } else {}
     })
 
-    $('#cmd_template').select2({
-        multiple: false,
-        placeholder: '请选择用户名',
-        allowClear: true,
-        data: [{id:1,text:'1'},{id:2,text:'2'}]
+    $.post('/cmd_template_dropdown/', {}, function (d) {
+        $('#cmd_template').select2({
+            multiple: false,
+            placeholder: '请选择模板命令',
+            allowClear: true,
+            data: d
+        });
+{#        $('#cmd_template').select2("data",d)#}
     });
+
+
 
     aButtons = [
             {
@@ -156,7 +188,7 @@ $(document).ready(function () {
                 "sButtonText": '<font color="white">执行命令</font><i class="fa fa-toggle-right"></i>',
                 "sButtonClass": "btn blue",
                 "fnComplete": function (nButton, oConfig, nRow) {
-                    run_cmd()
+                    run_cmd_verify()
                 }
             },
             {
@@ -188,6 +220,7 @@ $(document).ready(function () {
 
 
 });
+
 function loaddata() {
     oTable = $('#datatables').dataTable({
         "sAjaxSource": "/get_server_list/?rand=" + Math.random(),
@@ -290,29 +323,51 @@ function select_all() {
 function run_cmd() {
     $('#cmd_results').html('')
     var cmd = $('#input_cmd').val()
-    var oTT = TableTools.fnGetInstance('datatables');
-    var aData = oTT.fnGetSelectedData();
-    if (aData.length != 0) {
-        showAjaxLoad()
-        var server_names = []
-        var belong_tos = []
-        for(var i in aData){
-            server_names.push(aData[i][0])
-            belong_tos.push(aData[i][4])
+    var cmd_template = $('#cmd_template').select2('data')
+    if (cmd != '' || cmd_template != null) {
+        if (cmd_template != null) {
+            cmd_template = cmd_template["text"]
         }
-        server_names = server_names.join(',')
-        belong_tos = belong_tos.join(',')
-        $.post('/run_cmd/', {server_names: server_names,cmd:cmd,belong_tos:belong_tos}, function (d) {
-            hideAjaxLoad()
-            if (d.code == 0) {
-                $('#cmd_results').html(d.cmd_results)
-                toastr.success(d.msg)
-                $("#myModal").modal('show')
-            } else {
-                toastr.error(d.msg)
+        if (cmd != '' && cmd_template != null) {
+            toastr.error('只能单独运行手动命令或者模板命令')
+        } else {
+            var oTT = TableTools.fnGetInstance('datatables');
+            var aData = oTT.fnGetSelectedData();
+            if (aData.length != 0) {
+                showAjaxLoad()
+                var server_names = []
+                var belong_tos = []
+                for (var i in aData) {
+                    server_names.push(aData[i][0])
+                    belong_tos.push(aData[i][4])
+                }
+                server_names = server_names.join(',')
+                belong_tos = belong_tos.join(',')
+                $.post('/run_cmd/', {
+                    server_names: server_names,
+                    cmd: cmd,
+                    cmd_template: cmd_template,
+                    belong_tos: belong_tos
+                }, function (d) {
+                    hideAjaxLoad()
+                    if (d.code == 0) {
+                        $('#cmd_results').html(d.cmd_results)
+                        toastr.success(d.msg)
+                        $("#myModal").modal('show')
+                    } else {
+                        toastr.error(d.msg)
+                    }
+                })
             }
-        })
+        }
+    }else{
+        toastr.error('不能运行空命令')
     }
+    $("#myModal2").modal('hide')
+}
+
+function run_cmd_verify() {
+        $("#myModal2").modal('show')
 }
 
 function del() {
