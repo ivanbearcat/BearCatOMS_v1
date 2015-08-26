@@ -213,7 +213,7 @@ function loaddata() {
 
         ],
         "aaSorting": [
-            [0, 'desc']
+            [1, 'asc']
         ],
         "oLanguage": {
             "sProcessing": "正在加载数据...",
@@ -311,6 +311,7 @@ function edit() {
         content = content.split('<br>')
         content = content.join('\n')
         content = content.replace(/&nbsp/g,' ')
+        content = content.substring(0,content.length-1)
         var id = aData[0][3];
         $('#center_server').select2('data',{'text':center_server})
         $('#name').val(name)
@@ -326,7 +327,7 @@ function del() {
     var aData = oTT.fnGetSelectedData();
     if (aData.length == 1) {
         showAjaxLoad()
-        $.post('/salt_state_del/', {id: aData[0][2]}, function (d) {
+        $.post('/salt_state_del/', {id: aData[0][3]}, function (d) {
             hideAjaxLoad()
             if (d.code == 0) {
                 toastr.success(d.msg)

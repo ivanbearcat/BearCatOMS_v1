@@ -470,7 +470,7 @@ def run_cmd(request):
             if cmd:
                 cmd_result = client_send_data("{'salt':1,'act':'cmd.run','hosts':'%s','argv':%s}" % (v,cmd.split(',,')),CENTER_SERVER[k][0],CENTER_SERVER[k][1])
                 cmd_result = convert_str_to_html(cmd_result)
-                if cmd_results:
+                if not cmd_results:
                     cmd_results = cmd_result
                 else:
                     cmd_results = cmd_results + '<br><br><br><br>' + cmd_result
