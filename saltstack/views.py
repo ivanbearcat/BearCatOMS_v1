@@ -11,6 +11,10 @@ from BearCatOMS.settings import CENTER_SERVER
 from saltstack.models import saltstack_state,saltstack_top
 from operation.models import server_list
 import simplejson,os,commands
+from gevent import monkey; monkey.patch_socket()
+import gevent
+from gevent.queue import Queue
+from gevent.pool import Pool
 
 @login_required
 def salt_top(request):
@@ -158,14 +162,24 @@ def salt_top_run(request):
                 run_target_dict[i[0]] = []
             run_target_dict[i[0]].append(i[1])
     try:
-        for i in run_target_dict.keys():
-            for j in run_target_dict[i]:
-                cmd_result = client_send_data("{'salt':1,'act':'state.highstate','hosts':'%s','argv':''}" % j,CENTER_SERVER[i][0],CENTER_SERVER[i][1])
-                cmd_result = convert_str_to_html(cmd_result)
-                if not cmd_results:
-                    cmd_results = cmd_result
-                else:
-                    cmd_results = cmd_results + '<br><br><br><br>' + cmd_result
+        def gevent_run_all(CENTER_SERVER,client_send_data,p,q):
+            for i in run_target_dict.keys():
+                for j in run_target_dict[i]:
+                    p.spawn(gevent_run,CENTER_SERVER,client_send_data,i,j,q)
+        def gevent_run(CENTER_SERVER,client_send_data,i,j,q):
+            cmd_result = client_send_data("{'salt':1,'act':'state.highstate','hosts':'%s','argv':''}" % j,CENTER_SERVER[i][0],CENTER_SERVER[i][1])
+            cmd_result = convert_str_to_html(cmd_result)
+            q.put(cmd_result)
+        p = Pool()
+        q = Queue()
+        p.spawn(gevent_run_all,CENTER_SERVER,client_send_data,p,q)
+        p.join()
+        for i in range(q.qsize()):
+            cmd_result = q.get()
+            if not cmd_results:
+                cmd_results = cmd_result
+            else:
+                cmd_results = cmd_results + '<br><br><br><br>' + cmd_result
         return HttpResponse(simplejson.dumps({'code':0,'msg':u'模块执行完成','cmd_results':cmd_results}),content_type="application/json")
     except Exception,e:
         return HttpResponse(simplejson.dumps({'code':1,'msg':u'模块执行失败'}),content_type="application/json")
