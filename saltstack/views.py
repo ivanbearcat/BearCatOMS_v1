@@ -143,9 +143,10 @@ def salt_top_dropdown(request):
 @login_required
 def salt_top_del(request):
     try:
-        _id = request.POST.get('id')
-        orm = saltstack_top.objects.get(id=_id)
-        orm.delete()
+        target_id = request.POST.get('target_id')
+        for i in target_id.split(','):
+            orm = saltstack_top.objects.get(id=i)
+            orm.delete()
         return HttpResponse(simplejson.dumps({'code':0,'msg':u'删除成功'}),content_type="application/json")
     except Exception,e:
         logger.error(e)

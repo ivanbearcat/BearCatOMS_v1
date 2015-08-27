@@ -223,7 +223,7 @@ License: You must have a valid license purchased only from themeforest(the above
 <!-- END PAGE LEVEL SCRIPTS -->
 <script>
 jQuery(document).ready(function() {
-   App.init(); // initlayout and core plugins
+    App.init(); // initlayout and core plugins
 //   Index.init();
 //   Index.initCalendar(); // init index page's custom scripts
 //   Index.initCharts(); // init index page's custom scripts
@@ -232,9 +232,14 @@ jQuery(document).ready(function() {
 //   Index.initDashboardDaterange();
 //   Index.initIntro();
 //   Tasks.initDashboardWidget();
-   $('#{{path1}}').attr('class','active');
-   $('#{{path2}}').attr('class','active');
+    $('#{{path1}}').attr('class','active');
+    $('#{{path2}}').attr('class','active');
 
+    $.post('/password_expire/', {}, function (d) {
+        if (d.code == 0) {
+            toastr.warning(d.msg)
+        } else {}
+    })
 });
 
 

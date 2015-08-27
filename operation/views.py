@@ -239,12 +239,15 @@ def server_operation(request):
 def password_expire(request):
     orm = perm.objects.get(username=request.user.username)
     expire_time = orm.server_password_expire
-    expire_time_format = datetime.date(int(expire_time.split('-')[0]),int(expire_time.split('-')[1]),int(expire_time.split('-')[2]))
-    expire_day = int(expire_time_format.strftime('%s')) - int(datetime.date.today().strftime('%s'))
-    expire_day = expire_day / 60 / 60 / 24
-    if expire_day < 10:
-        msg = '您的服务器密码将于%s过期，请尽快修改密码' % expire_day
-        return HttpResponse(simplejson.dumps({'code':0,'msg':msg}),content_type="application/json")
+    if expire_time:
+        expire_time_format = datetime.date(int(expire_time.split('-')[0]),int(expire_time.split('-')[1]),int(expire_time.split('-')[2]))
+        expire_day = int(expire_time_format.strftime('%s')) - int(datetime.date.today().strftime('%s'))
+        expire_day = expire_day / 60 / 60 / 24
+        if expire_day < 10:
+            msg = '您的服务器密码将于%s过期，请尽快修改密码' % expire_day
+            return HttpResponse(simplejson.dumps({'code':0,'msg':msg}),content_type="application/json")
+        else:
+            return HttpResponse(simplejson.dumps({'code':1}),content_type="application/json")
     else:
         return HttpResponse(simplejson.dumps({'code':1}),content_type="application/json")
 
@@ -424,7 +427,8 @@ def search_server_list(request):
                 inner_ip = client_send_data("{'salt':1,'act':'grains.item','hosts':'%s','argv':['ipv4']}" % k,CENTER_SERVER[i][0],CENTER_SERVER[i][1])
                 inner_ip = eval(inner_ip)
                 inner_ip[k]['ipv4'].remove('127.0.0.1')
-                cmd = ["curl http://www.whereismyip.com/|grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'"]
+                # cmd = ["curl http://www.whereismyip.com/|grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'"]
+                cmd = ['curl http://members.3322.org/dyndns/getip']
                 external_ip = client_send_data("{'salt':1,'act':'cmd.run','hosts':'%s','argv':%s}" % (k,cmd),CENTER_SERVER[i][0],CENTER_SERVER[i][1])
                 external_ip = eval(external_ip)
                 external_ip = external_ip[k].split('\n')[-1]

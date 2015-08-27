@@ -442,9 +442,14 @@ function edit() {
 function del() {
     var oTT = TableTools.fnGetInstance('datatables');
     var aData = oTT.fnGetSelectedData();
-    if (aData.length == 1) {
+    if (aData.length > 0) {
+        target_id = []
         showAjaxLoad()
-        $.post('/salt_top_del/', {id: aData[0][3]}, function (d) {
+        for (var i in aData) {
+            target_id.push(aData[i][3])
+        }
+        target_id = target_id.join(',')
+        $.post('/salt_top_del/', {target_id: target_id}, function (d) {
             hideAjaxLoad()
             if (d.code == 0) {
                 toastr.success(d.msg)
