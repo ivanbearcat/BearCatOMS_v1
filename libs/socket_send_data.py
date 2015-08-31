@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from BearCatOMS.settings import SECRET_KEY
 from libs import crypt
-import socket
+import socket,time
 
 def client_send_data(cmd,dest,port):
     send_data = crypt.strong_encrypt(SECRET_KEY,cmd)
@@ -15,6 +15,7 @@ def client_send_data(cmd,dest,port):
             data = s.recv(1024)
             recv_data += data
             s.setblocking(0)
+            time.sleep(0.1)
     except Exception:
         pass
     recv_data = crypt.strong_decrypt(SECRET_KEY,str(recv_data))
