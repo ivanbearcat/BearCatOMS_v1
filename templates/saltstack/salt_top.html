@@ -492,8 +492,8 @@ function run() {
         $.post('/salt_top_run/', {center_server:center_server,run_target:run_target}, function (d) {
             if (d.code == 0) {
                 console.info(d.cmd_results)
-                var data = d.cmd_results.replace(/stdout:&nbsp'(.*?[^'])'<br>/,'stdout:&nbsp\'<font color="green"><b>$1</b></font>\'<br>')
-                data = data.replace(/stderr:&nbsp'(.*?)[^']'<br>/,'stderr:&nbsp\'<font color="red"><b>$1</b></font>\'<br>')
+                var data = d.cmd_results.replace(/stdout:&nbsp'(.*?)'<br>/,'stdout:&nbsp\'<font color="green"><b>$1</b></font>\'<br>')
+                data = data.replace(/stderr:&nbsp'(.*?)'<br>/,'stderr:&nbsp\'<font color="red"><b>$1</b></font>\'<br>')
                 data = data.replace(/true/,'<font color="green"><b>true</b></font>')
                 data = data.replace(/false/,'<font color="red"><b>false</b></font>')
                 $('#cmd_results').html(data)
