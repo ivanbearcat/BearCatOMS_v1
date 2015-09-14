@@ -8,7 +8,7 @@ from libs.check_perm import check_permission
 from libs.socket_send_data import client_send_data
 from libs.str_to_html import convert_str_to_html
 from BearCatOMS.settings import CENTER_SERVER
-from saltstack.models import saltstack_state,saltstack_top
+from saltstack.models import saltstack_state,saltstack_top,saltstack_pillar
 from operation.models import server_list
 import simplejson,os,commands
 from gevent import monkey; monkey.patch_socket()
@@ -28,6 +28,7 @@ def salt_top(request):
                                                            'page_name1':u'saltstack',
                                                            'page_name2':u'state模块对应'})
 
+@login_required
 def salt_top_data(request):
     sEcho =  request.POST.get('sEcho') #标志，直接返回
     iDisplayStart = int(request.POST.get('iDisplayStart'))#第几行开始
@@ -197,6 +198,7 @@ def salt_state(request):
                                                            'page_name1':u'saltstack',
                                                            'page_name2':u'state模块定义'})
 
+@login_required
 def salt_state_data(request):
     sEcho =  request.POST.get('sEcho') #标志，直接返回
     iDisplayStart = int(request.POST.get('iDisplayStart'))#第几行开始
@@ -269,7 +271,7 @@ def salt_state_save(request):
             orm.save()
             if name != old_name:
                 os.system('''ssh %s "rm -r %s/%s"''' % (CENTER_SERVER[center_server][0],master_dir,old_name))
-        os.system('''ssh %s "mkdir -p %s/%s;cat > %s/%s/init.sls << EOF\n%s"''' % (CENTER_SERVER[center_server][0],master_dir,name,master_dir,name,content))
+        os.system('''ssh %s "mkdir -p %s/%s;cat > %s/%s/init.sls << EOF\n%s\nEOF"''' % (CENTER_SERVER[center_server][0],master_dir,name,master_dir,name,content))
         return HttpResponse(simplejson.dumps({'code':0,'msg':u'保存成功'}),content_type="application/json")
     except Exception,e:
         logger.error(e)
@@ -297,6 +299,124 @@ def salt_state_del(request):
             return HttpResponse(simplejson.dumps({'code':1,'msg':u'模块已被应用无法删除'}),content_type="application/json")
         master_dir = commands.getoutput('''ssh %s "grep -A2 '^file_roots' /etc/salt/master |grep 'base:' -A1|grep '-'|cut -d'-' -f2"''' % CENTER_SERVER[orm.center_server][0])
         os.system('''ssh %s "rm -r %s/%s"''' % (CENTER_SERVER[orm.center_server][0],master_dir,orm.name))
+        orm.delete()
+        return HttpResponse(simplejson.dumps({'code':0,'msg':u'删除成功'}),content_type="application/json")
+    except Exception,e:
+        logger.error(e)
+        return HttpResponse(simplejson.dumps({'code':1,'msg':u'删除失败'}),content_type="application/json")
+
+@login_required
+def salt_pillar(request):
+    flag = check_permission(u'state模块定义',request.user.username)
+    if flag < 1:
+        return render_to_response('public/no_passing.html')
+    path = request.path.split('/')[1]
+    return render_to_response('saltstack/salt_pillar.html',{'user':request.user.username,
+                                                           'path1':'saltstack',
+                                                           'path2':path,
+                                                           'page_name1':u'saltstack',
+                                                           'page_name2':u'pillar参数定义'})
+
+@login_required
+def salt_pillar_data(request):
+    sEcho =  request.POST.get('sEcho') #标志，直接返回
+    iDisplayStart = int(request.POST.get('iDisplayStart'))#第几行开始
+    iDisplayLength = int(request.POST.get('iDisplayLength'))#显示多少行
+    iSortCol_0 = int(request.POST.get("iSortCol_0"))#排序行号
+    sSortDir_0 = request.POST.get('sSortDir_0')#asc/desc
+    sSearch = request.POST.get('sSearch')#高级搜索
+
+    aaData = []
+    sort = ['center_server','name','content']
+
+    if  sSortDir_0 == 'asc':
+        if sSearch == '':
+            result_data = saltstack_pillar.objects.all().order_by(sort[iSortCol_0])[iDisplayStart:iDisplayStart+iDisplayLength]
+            iTotalRecords = saltstack_pillar.objects.all().count()
+        else:
+            result_data = saltstack_pillar.objects.filter(Q(name__contains=sSearch) | \
+                                               Q(center_server__contains=sSearch) | \
+                                               Q(content__contains=sSearch)) \
+                                            .order_by(sort[iSortCol_0])[iDisplayStart:iDisplayStart+iDisplayLength]
+            iTotalRecords = saltstack_pillar.objects.filter(Q(name__contains=sSearch) | \
+                                                 Q(center_server__contains=sSearch) | \
+                                                 Q(content__contains=sSearch)).count()
+    else:
+        if sSearch == '':
+            result_data = saltstack_pillar.objects.all().order_by(sort[iSortCol_0]).reverse()[iDisplayStart:iDisplayStart+iDisplayLength]
+            iTotalRecords = saltstack_pillar.objects.all().count()
+        else:
+            result_data = saltstack_pillar.objects.filter(Q(name__contains=sSearch) | \
+                                               Q(center_server__contains=sSearch) | \
+                                               Q(content__contains=sSearch)) \
+                                            .order_by(sort[iSortCol_0]).reverse()[iDisplayStart:iDisplayStart+iDisplayLength]
+            iTotalRecords = saltstack_pillar.objects.filter(Q(name__contains=sSearch) | \
+                                                 Q(center_server__contains=sSearch) | \
+                                                 Q(content__contains=sSearch)).count()
+
+    for i in  result_data:
+        content = []
+        for j in i.content.split('\n'):
+            content.append(j+'<br>')
+        aaData.append({
+                       '0':i.center_server,
+                       '1':i.name,
+                       '2':''.join(content).replace(' ','&nbsp'),
+                       '3':i.id
+                      })
+    result = {'sEcho':sEcho,
+               'iTotalRecords':iTotalRecords,
+               'iTotalDisplayRecords':iTotalRecords,
+               'aaData':aaData
+    }
+    return HttpResponse(simplejson.dumps(result),content_type="application/json")
+
+@login_required
+def salt_pillar_save(request):
+    _id = request.POST.get('id')
+    center_server = request.POST.get('center_server')
+    name = request.POST.get('name')
+    content = request.POST.get('content')
+    master_dir = commands.getoutput('''ssh %s "grep -A2 '^pillar_roots' /etc/salt/master |grep 'base:' -A1|grep '-'|cut -d'-' -f2"''' % CENTER_SERVER[center_server][0])
+
+    try:
+        if _id =='':
+            saltstack_pillar.objects.create(center_server=center_server,name=name,content=content)
+        else:
+            orm = saltstack_pillar.objects.get(id=_id)
+            old_name = orm.name
+            orm.name = name
+            orm.content = content
+            orm.save()
+            if name != old_name:
+                os.system('''ssh %s "rm -r %s/%s"''' % (CENTER_SERVER[center_server][0],master_dir,old_name))
+        os.system('''ssh %s "cat > %s/%s.sls << EOF\n%s\nEOF"''' % (CENTER_SERVER[center_server][0],master_dir,name,content))
+        content = '''base:\n  '*':\n'''
+        for i in  saltstack_pillar.objects.all():
+            content += '''    - %s\n''' % i.name
+        content += 'EOF'
+        os.system('''ssh %s "cat > %s/top.sls << EOF\n%s"''' % (CENTER_SERVER[center_server][0],master_dir,content))
+        return HttpResponse(simplejson.dumps({'code':0,'msg':u'保存成功'}),content_type="application/json")
+    except Exception,e:
+        logger.error(e)
+        return HttpResponse(simplejson.dumps({'code':1,'msg':str(e)}),content_type="application/json")
+
+@login_required
+def salt_pillar_dropdown(request):
+    result = []
+    count = 0
+    for i in CENTER_SERVER.keys():
+        result.append({'text':i,'id':count})
+        count += 1
+    return HttpResponse(simplejson.dumps(result),content_type="application/json")
+
+@login_required
+def salt_pillar_del(request):
+    try:
+        _id = request.POST.get('id')
+        orm = saltstack_pillar.objects.get(id=_id)
+        master_dir = commands.getoutput('''ssh %s "grep -A2 '^pillar_roots' /etc/salt/master |grep 'base:' -A1|grep '-'|cut -d'-' -f2"''' % CENTER_SERVER[orm.center_server][0])
+        os.system('''ssh %s "rm -r %s/%s\.sls"''' % (CENTER_SERVER[orm.center_server][0],master_dir,orm.name))
         orm.delete()
         return HttpResponse(simplejson.dumps({'code':0,'msg':u'删除成功'}),content_type="application/json")
     except Exception,e:
