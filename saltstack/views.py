@@ -10,6 +10,7 @@ from libs.str_to_html import convert_str_to_html
 from BearCatOMS.settings import CENTER_SERVER
 from saltstack.models import saltstack_state,saltstack_top,saltstack_pillar
 from operation.models import server_list
+from perm_manage.models import perm,server_group_list
 import simplejson,os,commands
 from gevent import monkey; monkey.patch_socket()
 import gevent
@@ -65,13 +66,20 @@ def salt_top_data(request):
                                                  Q(center_server__contains=sSearch) | \
                                                  Q(state__contains=sSearch)).count()
 
+    orm = perm.objects.get(username=request.user.username)
+    servers = []
+    for i in orm.server_groups.split(','):
+        orm_server = server_group_list.objects.get(server_group_name=i)
+        servers += orm_server.members_server.split(',')
+
     for i in  result_data:
-        aaData.append({
-                       '0':i.center_server,
-                       '1':i.target,
-                       '2':i.state,
-                       '3':i.id
-                      })
+        if i.target in servers:
+            aaData.append({
+                           '0':i.center_server,
+                           '1':i.target,
+                           '2':i.state,
+                           '3':i.id
+                          })
     result = {'sEcho':sEcho,
                'iTotalRecords':iTotalRecords,
                'iTotalDisplayRecords':iTotalRecords,
@@ -85,28 +93,28 @@ def salt_top_save(request):
     center_server = request.POST.get('center_server')
     target = request.POST.get('target')
     state = request.POST.get('state')
-    master_dir = commands.getoutput('''ssh %s "grep -A2 '^file_roots' /etc/salt/master |grep 'base:' -A1|grep '-'|cut -d'-' -f2"''' % CENTER_SERVER[center_server][0])
+    # master_dir = commands.getoutput('''ssh %s "grep -A2 '^file_roots' /etc/salt/master |grep 'base:' -A1|grep '-'|cut -d'-' -f2"''' % CENTER_SERVER[center_server][0])
 
     try:
         if _id =='':
-            for i in target.split(','):
-                if saltstack_top.objects.filter(target=i):
-                    return HttpResponse(simplejson.dumps({'code':1,'msg':u'目标主机已存在对应'}),content_type="application/json")
-                else:
-                    saltstack_top.objects.create(center_server=center_server,target=i,state=state)
+            # for i in target.split(','):
+            #     if saltstack_top.objects.filter(target=i):
+            #         return HttpResponse(simplejson.dumps({'code':1,'msg':u'目标主机已存在对应'}),content_type="application/json")
+            #     else:
+            saltstack_top.objects.create(center_server=center_server,target=target,state=state)
         else:
             orm = saltstack_top.objects.get(id=_id)
             orm.center_server = center_server
             orm.target = target
             orm.state = state
             orm.save()
-        content = 'base:\n'
-        for i in  saltstack_top.objects.all():
-            content += "  '%s':\n" % i.target
-            for j in i.state.split(','):
-                content += '    - %s\n' % j
-        content += 'EOF'
-        os.system('''ssh %s "cat > %s/top.sls << EOF\n%s"''' % (CENTER_SERVER[center_server][0],master_dir,content))
+        # content = 'base:\n'
+        # for i in  saltstack_top.objects.all():
+        #     content += "  '%s':\n" % i.target
+        #     for j in i.state.split(','):
+        #         content += '    - %s\n' % j
+        # content += 'EOF'
+        # os.system('''ssh %s "cat > %s/top.sls << EOF\n%s"''' % (CENTER_SERVER[center_server][0],master_dir,content))
         return HttpResponse(simplejson.dumps({'code':0,'msg':u'保存成功'}),content_type="application/json")
     except Exception,e:
         logger.error(e)
@@ -157,17 +165,36 @@ def salt_top_del(request):
 def salt_top_run(request):
     center_server = request.POST.get('center_server')
     run_target = request.POST.get('run_target')
+    state = request.POST.get('state')
     run_target_dict = {}
+    target = []
     cmd_results = ''
-    for i in  zip(center_server.split(','),run_target.split(',')):
-            if not run_target_dict.has_key(i[0]):
-                run_target_dict[i[0]] = []
-            run_target_dict[i[0]].append(i[1])
+
+    for i in  zip(center_server.split('|'),run_target.split('|'),state.split('|')):
+        if not run_target_dict.has_key(i[0]):
+            run_target_dict[i[0]] = []
+        run_target_dict[i[0]].append((i[1],i[2]))
+
+    for i in run_target_dict.keys():
+        master_dir = commands.getoutput('''ssh %s "grep -A2 '^file_roots' /etc/salt/master |grep 'base:' -A1|grep '-'|cut -d'-' -f2"''' % CENTER_SERVER[i][0])
+        content = 'base:\n'
+        for j in run_target_dict[i]:
+            for n in j[0].split(','):
+                if not n in target:
+                    target.append(n)
+                else:
+                    return HttpResponse(simplejson.dumps({'code':1,'msg':u'目标主机不能重复','cmd_results':cmd_results}),content_type="application/json")
+                content += "  '%s':\n" % n
+                for m in j[1].split(','):
+                    content += '    - %s\n' % m
+        content += 'EOF'
+        os.system('''ssh %s "cat > %s/top.sls << EOF\n%s"''' % (CENTER_SERVER[i][0],master_dir,content))
+
     try:
         def gevent_run_all(CENTER_SERVER,client_send_data,p,q):
             for i in run_target_dict.keys():
                 for j in run_target_dict[i]:
-                    p.spawn(gevent_run,CENTER_SERVER,client_send_data,i,j,q)
+                    p.spawn(gevent_run,CENTER_SERVER,client_send_data,i,j[0],q)
         def gevent_run(CENTER_SERVER,client_send_data,i,j,q):
             cmd_result = client_send_data("{'salt':1,'act':'state.highstate','hosts':'%s','argv':''}" % j,CENTER_SERVER[i][0],CENTER_SERVER[i][1])
             cmd_result = convert_str_to_html(cmd_result)

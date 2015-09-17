@@ -7,7 +7,7 @@ import simplejson,re,os,datetime,time,subprocess
 from django.db.models.query_utils import Q
 from operation.models import upload_files,server_list,command_template
 from audit.models import log
-from perm_manage.models import perm
+from perm_manage.models import perm,server_group_list
 from django import forms
 from libs.socket_send_data import client_send_data
 from libs.str_to_html import convert_str_to_html
@@ -394,16 +394,23 @@ def get_server_list(request):
                                                  Q(belong_to__contains=sSearch) | \
                                                  Q(os__contains=sSearch)).count()
 
+    orm = perm.objects.get(username=request.user.username)
+    servers = []
+    for i in orm.server_groups.split(','):
+        orm_server = server_group_list.objects.get(server_group_name=i)
+        servers += orm_server.members_server.split(',')
+
     for i in  result_data:
-        aaData.append({
-                       '0':i.server_name,
-                       '1':i.inner_ip,
-                       '2':i.external_ip,
-                       '3':i.os,
-                       '4':i.belong_to,
-                       '5':i.status,
-                       '6':i.id
-                      })
+        if i.server_name in servers:
+            aaData.append({
+                           '0':i.server_name,
+                           '1':i.inner_ip,
+                           '2':i.external_ip,
+                           '3':i.os,
+                           '4':i.belong_to,
+                           '5':i.status,
+                           '6':i.id
+                          })
     result = {'sEcho':sEcho,
                'iTotalRecords':iTotalRecords,
                'iTotalDisplayRecords':iTotalRecords,
@@ -480,7 +487,7 @@ def run_cmd(request):
                     cmd_results = cmd_results + '<br><br><br><br>' + cmd_result
             if cmd_template:
                 orm = command_template.objects.get(description=cmd_template)
-                command = 'echo "%s" > /tmp/tempfile && bash /tmp/tempfile;rm -rf /tmp/tempfile' % orm.cmd
+                command = '''echo '%s' > /tmp/tempfile && bash /tmp/tempfile;rm -rf /tmp/tempfile''' % orm.cmd
                 cmd_result = client_send_data("{'salt':1,'act':'cmd.run','hosts':'%s','argv':%s}" % (v,command.split(',,')),CENTER_SERVER[k][0],CENTER_SERVER[k][1])
                 cmd_result = convert_str_to_html(cmd_result)
                 if cmd_results:

@@ -480,27 +480,31 @@ function run() {
     if (aData.length > 0) {
         var center_server_list = []
         var run_target_list = []
+        var state_list = []
         showAjaxLoad()
         for (var i in aData) {
             center_server_list.push(aData[i][0])
             run_target_list.push(aData[i][1])
+            state_list.push(aData[i][2])
         }
-        var center_server = center_server_list.join(',')
-        var run_target = run_target_list.join(',')
+        var center_server = center_server_list.join('|')
+        var run_target = run_target_list.join('|')
+        var state = state_list.join('|')
         $("#myModal2").modal('hide')
 
-        $.post('/salt_top_run/', {center_server:center_server,run_target:run_target}, function (d) {
+        $.post('/salt_top_run/', {center_server:center_server,run_target:run_target,state:state}, function (d) {
             if (d.code == 0) {
                 console.info(d.cmd_results)
-                var data = d.cmd_results.replace(/stdout:&nbsp'(.*?)'<br>/,'stdout:&nbsp\'<font color="green"><b>$1</b></font>\'<br>')
-                data = data.replace(/stderr:&nbsp'(.*?)'<br>/,'stderr:&nbsp\'<font color="red"><b>$1</b></font>\'<br>')
-                data = data.replace(/true/,'<font color="green"><b>true</b></font>')
-                data = data.replace(/false/,'<font color="red"><b>false</b></font>')
+                var data = d.cmd_results.replace(/stdout:&nbsp'(.*?)'<br>/g,'stdout:&nbsp\'<font color="green"><b>$1</b></font>\'<br>')
+                data = data.replace(/stderr:&nbsp'(.*?)'<br>/g,'stderr:&nbsp\'<font color="red"><b>$1</b></font>\'<br>')
+                data = data.replace(/true/g,'<font color="green"><b>true</b></font>')
+                data = data.replace(/false/g,'<font color="red"><b>false</b></font>')
                 $('#cmd_results').html(data)
                 hideAjaxLoad()
                 $("#myModal3").modal('show')
                 toastr.success(d.msg)
             } else {
+                hideAjaxLoad()
                 toastr.error(d.msg)
             }
         })
