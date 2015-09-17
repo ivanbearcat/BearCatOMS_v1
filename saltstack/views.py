@@ -140,13 +140,25 @@ def salt_top_dropdown(request):
         for i in orm.state.split(','):
             orm_state = saltstack_state.objects.get(name=i)
             result['state']['edit'].append({'text':i,'id':orm_state.id})
+
+    orm = perm.objects.get(username=request.user.username)
+    servers = []
+    for i in orm.server_groups.split(','):
+        orm_server = server_group_list.objects.get(server_group_name=i)
+        servers += orm_server.members_server.split(',')
+
     for i in CENTER_SERVER.keys():
         result['center_server'].append({'text':i,'id':count})
         count += 1
     for i in server_list.objects.all():
-        result['target']['list'].append({'text':i.server_name,'id':i.id})
+        if i.server_name in servers:
+            result['target']['list'].append({'text':i.server_name,'id':i.id})
     for i in saltstack_state.objects.all():
         result['state']['list'].append({'text':i.name,'id':i.id})
+
+
+
+
     return HttpResponse(simplejson.dumps(result),content_type="application/json")
 
 @login_required
