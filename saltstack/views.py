@@ -71,7 +71,7 @@ def salt_top_data(request):
     for i in orm.server_groups.split(','):
         orm_server = server_group_list.objects.get(server_group_name=i)
         servers += orm_server.members_server.split(',')
-
+    print servers
     for i in  result_data:
         if i.target in servers:
             aaData.append({

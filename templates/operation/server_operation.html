@@ -229,10 +229,11 @@ function loaddata() {
         "bSort": true, //是否使用排序
         "bAutoWidth": true, //列的宽度会根据table的宽度自适应
         "sPaginationType": "bootstrap",
-//        "aLengthMenu": [
-//                    [5, 15, 20, -1],
-//                    [5, 15, 20, "All"] // change per page values here
-//                ],
+        "iDisplayLength":50,
+        "aLengthMenu": [
+                    [50, 100, 200, 100000000],
+                    [50, 100, 200, "All"] // change per page values here
+        ],
         "oTableTools": {
             "sRowSelect": "multi",
             'aButtons': aButtons
