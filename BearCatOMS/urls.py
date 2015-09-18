@@ -91,6 +91,5 @@ urlpatterns = patterns('',
     url(r'^salt_pillar/', salt_pillar),
     url(r'^salt_pillar_data/', salt_pillar_data),
     url(r'^salt_pillar_save/', salt_pillar_save),
-    url(r'^salt_pillar_dropdown/', salt_pillar_dropdown),
     url(r'^salt_pillar_del/', salt_pillar_del),
 )

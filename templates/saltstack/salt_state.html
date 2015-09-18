@@ -139,15 +139,6 @@ var aButtons
 /* Formating function for row details */
 
 $(document).ready(function () {
-    $.post('/salt_state_dropdown/', {}, function (d) {
-    $('#center_server').select2({
-        multiple: false,
-        placeholder: '请选择中心服务器',
-        allowClear: true,
-        data: d
-    });
-{#        $('#cmd_template').select2("data",d)#}
-    });
 
     aButtons = [
             {
@@ -252,15 +243,19 @@ function loaddata() {
 }
 
 function rule_save() {
+    var center_server_list = []
     var center_server = $('#center_server').select2('data')
+    for (var i in center_server) {
+        center_server_list.push(center_server[i]["text"])
+    }
+    center_server = center_server_list.join(',')
     var content = $('#content').val();
     var name = $('#name').val();
     var id = $('#id').val();
-    if (center_server == null || name == '' || content == '') {
+    if (center_server == '' || name == '' || content == '') {
         toastr.error('不能为空')
         return;
     }
-    center_server = center_server['text']
 
     showAjaxLoad()
     $(self).button('loading');//正在登陆中，显示data-loading-text 标记内容
@@ -295,7 +290,16 @@ function contain(Array, s) {
     return false;
 }
 function add() {
-    $('#center_server').val("")
+    $('#center_server').select2('data','')
+    $.post('/salt_state_dropdown/', {}, function (d) {
+        $('#center_server').select2({
+            multiple: true,
+            placeholder: '请选择中心服务器',
+            allowClear: true,
+            data: d['list']
+        });
+    });
+    $('#name').attr("disabled",false);
     $('#name').val("")
     $('#content').val("")
     $('#id').val("")
@@ -305,7 +309,7 @@ function edit() {
     var oTT = TableTools.fnGetInstance('datatables');
     var aData = oTT.fnGetSelectedData();
     if (aData.length == 1) {
-        var center_server = aData[0][0];
+        var center_server = aData[0][0]
         var name = aData[0][1];
         var content = aData[0][2];
         content = content.split('<br>')
@@ -313,8 +317,17 @@ function edit() {
         content = content.replace(/&nbsp/g,' ')
         content = content.substring(0,content.length-1)
         var id = aData[0][3];
-        $('#center_server').select2('data',{'text':center_server})
+        $.post('/salt_state_dropdown/', {center_server:center_server}, function (d) {
+            $('#center_server').select2({
+                multiple: true,
+                placeholder: '请选择中心服务器',
+                allowClear: true,
+                data: d['list']
+            });
+            $('#center_server').select2('data',d['edit'])
+        });
         $('#name').val(name)
+        $('#name').attr("disabled",true);
         $('#content').val(content)
         $('#id').val(id)
         $("#myModal").modal('show')

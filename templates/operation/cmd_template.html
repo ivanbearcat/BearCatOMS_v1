@@ -257,6 +257,7 @@ function contain(Array, s) {
     return false;
 }
 function add() {
+    $('#description').attr('disabled',false)
     $('#description').val("")
     $('#cmd').val("")
     $('#id').val("")
@@ -272,6 +273,7 @@ function edit() {
         cmd = cmd.join('\n')
         var id = aData[0][2];
         $('#description').val(description)
+        $('#description').attr('disabled',true)
         $('#cmd').val(cmd)
         $('#id').val(id)
         $("#myModal").modal('show')

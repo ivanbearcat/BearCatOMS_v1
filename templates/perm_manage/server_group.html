@@ -301,6 +301,7 @@ function add() {
         });
 
     })
+    $('#server_group_name').attr('disabled',false)
     $('#server_group_name').val("")
     $('#comment').val("")
     $('#id').val("")
@@ -324,6 +325,7 @@ function edit() {
             $('#members_server').select2("data",d['edit'])
         })
         $('#server_group_name').val(server_group_name)
+        $('#server_group_name').attr('disabled',true)
         $('#comment').val(comment)
         $('#id').val(id)
         $("#myModal").modal('show')

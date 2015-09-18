@@ -47,29 +47,29 @@
                 </div>
                 <div class="modal-body form">
                     <form action="#" class="form-horizontal form-row-seperated">
-                        <div class="form-group">
-                        <label class="col-sm-4 control-label">中心服务器</label>
-
-                        <div class="col-sm-8">
-                            <div class="input-group">
-															<span class="twitter-typeahead"
-                                                                  style="position: relative; display: inline-block;">
-                                                                <input type="text" class="form-control tt-hint"
-                                                                       disabled="" autocomplete="off" spellcheck="false"
-                                                                       style="position: absolute; top: 0px; left: 0px; border-color: transparent; box-shadow: none; background: none 0% 0% / auto repeat scroll padding-box border-box rgb(255, 255, 255);">
-                                                                <div type="text" id="center_server"
-                                                                     name="typeahead_example_modal_1"
-                                                                     class="form-control tt-input" autocomplete="off"
-                                                                     spellcheck="false" dir="auto"
-                                                                     style="width: 250px;position: relative; vertical-align: top; background-color: transparent;"></div><pre
-                                                                    aria-hidden="true"
-                                                                    style="position: absolute; visibility: hidden; white-space: nowrap; font-family: 'Open Sans', sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 400; word-spacing: 0px; letter-spacing: 0px; text-indent: 0px; text-rendering: auto; text-transform: none;"></pre><span
-                                                                    class="tt-dropdown-menu"
-                                                                    style="position: absolute; top: 100%; left: 0px; z-index: 100; display: none;"><div
-                                                                    class="tt-dataset-1"></div></span></span>
-                            </div>
-                        </div>
-                    </div>
+{#                        <div class="form-group">#}
+{#                        <label class="col-sm-4 control-label">中心服务器</label>#}
+{##}
+{#                        <div class="col-sm-8">#}
+{#                            <div class="input-group">#}
+{#															<span class="twitter-typeahead"#}
+{#                                                                  style="position: relative; display: inline-block;">#}
+{#                                                                <input type="text" class="form-control tt-hint"#}
+{#                                                                       disabled="" autocomplete="off" spellcheck="false"#}
+{#                                                                       style="position: absolute; top: 0px; left: 0px; border-color: transparent; box-shadow: none; background: none 0% 0% / auto repeat scroll padding-box border-box rgb(255, 255, 255);">#}
+{#                                                                <div type="text" id="center_server"#}
+{#                                                                     name="typeahead_example_modal_1"#}
+{#                                                                     class="form-control tt-input" autocomplete="off"#}
+{#                                                                     spellcheck="false" dir="auto"#}
+{#                                                                     style="width: 250px;position: relative; vertical-align: top; background-color: transparent;"></div><pre#}
+{#                                                                    aria-hidden="true"#}
+{#                                                                    style="position: absolute; visibility: hidden; white-space: nowrap; font-family: 'Open Sans', sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 400; word-spacing: 0px; letter-spacing: 0px; text-indent: 0px; text-rendering: auto; text-transform: none;"></pre><span#}
+{#                                                                    class="tt-dropdown-menu"#}
+{#                                                                    style="position: absolute; top: 100%; left: 0px; z-index: 100; display: none;"><div#}
+{#                                                                    class="tt-dataset-1"></div></span></span>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
                         <div class="form-group">
                         <label class="col-sm-4 control-label">目标主机</label>
 
@@ -332,7 +332,7 @@ function loaddata() {
 }
 
 function rule_save() {
-    var center_server = $('#center_server').select2('data')
+{#    var center_server = $('#center_server').select2('data')#}
     target_list = []
     var target = $('#target').select2('data')
     for (var i in target) {
@@ -346,11 +346,11 @@ function rule_save() {
     }
     state = state_list.join(',')
     var id = $('#id').val();
-    if (center_server == null || target == null || state == null) {
+    if (target == null || state == null) {
         toastr.error('不能为空')
         return;
     }
-    center_server = center_server['text']
+{#    center_server = center_server['text']#}
 
     showAjaxLoad()
     $(self).button('loading');//正在登陆中，显示data-loading-text 标记内容
@@ -360,7 +360,7 @@ function rule_save() {
         type: "POST",
         data: {
             id: id,
-            center_server: center_server,
+{#            center_server: center_server,#}
             target: target,
             state: state
         },
@@ -382,12 +382,12 @@ function add() {
     $('#target').select2('data','')
     $('#state').select2('data','')
     $.post('/salt_top_dropdown/', {}, function (d) {
-        $('#center_server').select2({
-            multiple: false,
-            placeholder: '请选择中心服务器',
-            allowClear: true,
-            data: d['center_server']
-        });
+{#        $('#center_server').select2({#}
+{#            multiple: false,#}
+{#            placeholder: '请选择中心服务器',#}
+{#            allowClear: true,#}
+{#            data: d['center_server']#}
+{#        });#}
         $('#target').select2({
             multiple: true,
             placeholder: '请选择目标主机',
@@ -408,16 +408,16 @@ function edit() {
     var oTT = TableTools.fnGetInstance('datatables');
     var aData = oTT.fnGetSelectedData();
     if (aData.length == 1) {
-        var center_server = aData[0][0];
+{#        var center_server = aData[0][0];#}
         var id = aData[0][3];
         $.post('/salt_top_dropdown/', {id:id}, function (d) {
-            $('#center_server').select2({
-                multiple: false,
-                placeholder: '请选择中心服务器',
-                allowClear: true,
-                data: d['center_server']
-            });
-            $('#center_server').select2('data',{'text':center_server})
+{#            $('#center_server').select2({#}
+{#                multiple: false,#}
+{#                placeholder: '请选择中心服务器',#}
+{#                allowClear: true,#}
+{#                data: d['center_server']#}
+{#            });#}
+{#            $('#center_server').select2('data',{'text':center_server})#}
             $('#target').select2({
                 multiple: true,
                 placeholder: '请选择目标主机',

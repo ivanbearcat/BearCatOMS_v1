@@ -273,6 +273,10 @@ def server_group_del(request):
     _id = request.POST.get('id')
     try:
         orm = server_group_list.objects.get(id=_id)
+        orm_user_perm = perm.objects.all()
+        for i in orm_user_perm:
+            if orm.server_group_name in i.server_groups.split(','):
+                return HttpResponse(simplejson.dumps({'code':1,'msg':u'无法删除已经被分配的主机组'}),content_type="application/json")
         orm.delete()
         return HttpResponse(simplejson.dumps({'code':0,'msg':u'删除成功'}),content_type="application/json")
     except Exception,e:

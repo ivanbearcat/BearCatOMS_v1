@@ -447,7 +447,7 @@ def search_server_list(request):
                 orm_server = server_list.objects.get(server_name=k)
                 orm_server.status = 1
                 orm_server.save()
-            for i in server_list.objects.all():
+            for i in server_list.objects.filter(belong_to=i):
                 if not i.server_name in dict_data.keys():
                     i.status = 0
                     i.save()
