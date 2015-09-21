@@ -40,7 +40,7 @@ def salt_top_data(request):
     sSearch = request.POST.get('sSearch')#高级搜索
 
     aaData = []
-    sort = ['center_server','target','state']
+    sort = ['center_server','target','state','id']
 
     if  sSortDir_0 == 'asc':
         if sSearch == '':
@@ -267,7 +267,7 @@ def salt_state_data(request):
     sSearch = request.POST.get('sSearch')#高级搜索
 
     aaData = []
-    sort = ['center_server','name','content']
+    sort = ['center_server','name','content','id']
 
     if  sSortDir_0 == 'asc':
         if sSearch == '':
@@ -393,7 +393,7 @@ def salt_pillar_data(request):
     sSearch = request.POST.get('sSearch')#高级搜索
 
     aaData = []
-    sort = ['center_server','name','content']
+    sort = ['center_server','name','content','id']
 
     if  sSortDir_0 == 'asc':
         if sSearch == '':
