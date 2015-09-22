@@ -7,6 +7,8 @@ from django.contrib.auth.decorators import login_required
 import simplejson,re
 from django.db.models.query_utils import Q
 from audit.models import log
+from operation.models import server_list
+from libs.get_client_ip import get_ip
 from libs.check_perm import check_permission
 from BearCatOMS.settings import CENTER_SERVER
 
@@ -82,20 +84,27 @@ def audit_log_data(request):
     return HttpResponse(simplejson.dumps(result),content_type="application/json")
 
 def audit_get_data(request):
-    ip = request.POST.get('ip')
-    username = request.POST.get('username')
-    command = request.POST.get ('command')
-    time = request.POST.get ('time')
-    last_command = log.objects.all().order_by('id').reverse()[:1]
-    for i in last_command:
-        if i.command == command:
-            return HttpResponse('duplicate')
-    if ip and username and command and time:
-        try:
-            log.objects.create(source_ip=ip,username=username,command=command,time=time)
-            return HttpResponse('success')
-        except Exception,e:
-            logger.error(e)
+    orm = server_list.objects.all()
+    allow_ip_list = []
+    for i in orm:
+        allow_ip_list.append(i.external_ip)
+    if get_ip(request) in allow_ip_list:
+        ip = request.POST.get('ip')
+        username = request.POST.get('username')
+        command = request.POST.get ('command')
+        time = request.POST.get ('time')
+        last_command = log.objects.all().order_by('id').reverse()[:1]
+        for i in last_command:
+            if i.command == command:
+                return HttpResponse('duplicate')
+        if ip and username and command and time:
+            try:
+                log.objects.create(source_ip=ip,username=username,command=command,time=time)
+                return HttpResponse('success')
+            except Exception,e:
+                logger.error(e)
+                return HttpResponse('error')
+        else:
             return HttpResponse('error')
     else:
-        return HttpResponse('error')
+        return HttpResponse('not allow')
