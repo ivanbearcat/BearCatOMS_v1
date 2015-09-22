@@ -145,6 +145,15 @@ $(document).ready(function () {
             {
                 "sExtends": 'text',
 
+                "sButtonText": '<font color="white">获取服务器列表</font><i class="fa fa-plus"></i>',
+                "sButtonClass": "btn yellow ",
+                "fnComplete": function (nButton, oConfig, nRow) {
+                    search_server_list()
+                }
+            },
+            {
+                "sExtends": 'text',
+
                 "sButtonText": '<font color="white">添加</font><i class="fa fa-plus"></i>',
                 "sButtonClass": "btn green ",
                 "fnComplete": function (nButton, oConfig, nRow) {
@@ -348,6 +357,19 @@ function del() {
             }
         })
     }
+}
+
+function search_server_list() {
+    showAjaxLoad()
+    $.post('/search_server_list/', {}, function (d) {
+        hideAjaxLoad()
+        if (d.code == 0) {
+            toastr.success(d.msg)
+            $('#datatables').dataTable().fnDraw()
+        } else {
+            toastr.error(d.msg)
+        }
+    })
 }
 
 </script>
