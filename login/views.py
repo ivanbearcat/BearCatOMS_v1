@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.utils.log import logger
 from django.contrib import auth
@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 
 
 def login(request):
-    return render_to_response('login/login.html')
+    return render(request,'login/login.html')
 
 def login_auth(request):
     user_auth = request.POST.get('username')
@@ -23,14 +23,14 @@ def login_auth(request):
             return HttpResponseRedirect('/main/')
     else:
         logger.warn('<%s> login in fail.' % user_auth)
-        return render_to_response('login/login.html',{'msg':u'账号或密码错误'})
+        return render(request,'login/login.html',{'msg':u'账号或密码错误'})
 
 def logout(request):
     auth.logout(request)
-    return render_to_response('login/login.html')
+    return render(request,'login/login.html')
 
 def not_login(request):
     next_next = request.GET.get('next')
     print next_next
     global next_next
-    return render_to_response('login/login.html',{'msg':u'您还没有登录'})
+    return render(request,'login/login.html',{'msg':u'您还没有登录'})

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.http import HttpResponseRedirect,HttpResponse
 from django.utils.log import logger
 from django.contrib.auth.decorators import login_required
@@ -21,9 +21,9 @@ from gevent.pool import Pool
 def upload(request):
     flag = check_permission(u'文件上传',request.user.username)
     if flag < 1:
-        return render_to_response('public/no_passing.html')
+        return render(request,'public/no_passing.html')
     path = request.path.split('/')[1]
-    return render_to_response('operation/upload.html',{'user':request.user.username,
+    return render(request,'operation/upload.html',{'user':request.user.username,
                                                            'path1':'operation',
                                                            'path2':path,
                                                            'page_name1':u'运维操作',
@@ -227,9 +227,9 @@ def rsync_dest_dropdown(request):
 def server_operation(request):
     flag = check_permission(u'服务器操作',request.user.username)
     if flag < 1:
-        return render_to_response('public/no_passing.html')
+        return render(request,'public/no_passing.html')
     path = request.path.split('/')[1]
-    return render_to_response('operation/server_operation.html',{'user':request.user.username,
+    return render(request,'operation/server_operation.html',{'user':request.user.username,
                                                            'path1':'operation',
                                                            'path2':path,
                                                            'page_name1':u'运维操作',
@@ -255,9 +255,9 @@ def password_expire(request):
 def cmd_template(request):
     flag = check_permission(u'命令模板',request.user.username)
     if flag < 1:
-        return render_to_response('public/no_passing.html')
+        return render(request,'public/no_passing.html')
     path = request.path.split('/')[1]
-    return render_to_response('operation/cmd_template.html',{'user':request.user.username,
+    return render(request,'operation/cmd_template.html',{'user':request.user.username,
                                                            'path1':'operation',
                                                            'path2':path,
                                                            'page_name1':u'运维操作',
@@ -561,9 +561,9 @@ def server_del(request):
 def fortress_server(request):
     flag = check_permission(u'堡垒机',request.user.username)
     if flag < 1:
-        return render_to_response('public/no_passing.html')
+        return render(request,'public/no_passing.html')
     path = request.path.split('/')[1]
-    return render_to_response('operation/fortress_server.html',{'user':request.user.username,
+    return render(request,'operation/fortress_server.html',{'user':request.user.username,
                                                            'path1':'operation',
                                                            'path2':path,
                                                            'page_name1':u'运维操作',

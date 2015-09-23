@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.utils.log import logger
 from django.contrib import auth
@@ -10,9 +10,9 @@ from libs.check_perm import check_permission
 def nagios(request):
     flag = check_permission(u'nagios',request.user.username)
     if flag < 1:
-        return render_to_response('public/no_passing.html')
+        return render(request,'public/no_passing.html')
     path = request.path.split('/')[1]
-    return render_to_response('monitor/nagios.html',{'user':request.user.username,
+    return render(request,'monitor/nagios.html',{'user':request.user.username,
                                                      'path1':'monitor',
                                                      'path2':path,
                                                      'page_name1':u'监控',
@@ -22,9 +22,9 @@ def nagios(request):
 def zabbix(request):
     flag = check_permission(u'zabbix',request.user.username)
     if flag < 1:
-        return render_to_response('public/no_passing.html')
+        return render(request,'public/no_passing.html')
     path = request.path.split('/')[1]
-    return render_to_response('monitor/zabbix.html',{'user':request.user.username,
+    return render(request,'monitor/zabbix.html',{'user':request.user.username,
                                                      'path1':'monitor',
                                                      'path2':path,
                                                      'page_name1':u'监控',

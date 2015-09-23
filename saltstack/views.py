@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.http import HttpResponseRedirect,HttpResponse
 from django.utils.log import logger
 from django.contrib.auth.decorators import login_required
@@ -22,9 +22,9 @@ from gevent.pool import Pool
 def salt_top(request):
     flag = check_permission(u'state模块对应',request.user.username)
     if flag < 1:
-        return render_to_response('public/no_passing.html')
+        return render(request,'public/no_passing.html')
     path = request.path.split('/')[1]
-    return render_to_response('saltstack/salt_top.html',{'user':request.user.username,
+    return render(request,'saltstack/salt_top.html',{'user':request.user.username,
                                                            'path1':'saltstack',
                                                            'path2':path,
                                                            'page_name1':u'saltstack',
@@ -249,9 +249,9 @@ def salt_top_run(request):
 def salt_state(request):
     flag = check_permission(u'state模块定义',request.user.username)
     if flag < 1:
-        return render_to_response('public/no_passing.html')
+        return render(request,'public/no_passing.html')
     path = request.path.split('/')[1]
-    return render_to_response('saltstack/salt_state.html',{'user':request.user.username,
+    return render(request,'saltstack/salt_state.html',{'user':request.user.username,
                                                            'path1':'saltstack',
                                                            'path2':path,
                                                            'page_name1':u'saltstack',
@@ -375,9 +375,9 @@ def salt_state_del(request):
 def salt_pillar(request):
     flag = check_permission(u'state模块定义',request.user.username)
     if flag < 1:
-        return render_to_response('public/no_passing.html')
+        return render(request,'public/no_passing.html')
     path = request.path.split('/')[1]
-    return render_to_response('saltstack/salt_pillar.html',{'user':request.user.username,
+    return render(request,'saltstack/salt_pillar.html',{'user':request.user.username,
                                                            'path1':'saltstack',
                                                            'path2':path,
                                                            'page_name1':u'saltstack',

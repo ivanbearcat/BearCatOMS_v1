@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.http import HttpResponseRedirect,HttpResponse
 from django.utils.log import logger
 from django.contrib.auth.decorators import login_required
@@ -15,9 +15,9 @@ import simplejson,datetime,re
 @login_required
 def user_perm(request):
     if not request.user.is_superuser:
-        return render_to_response('public/no_passing.html')
+        return render(request,'public/no_passing.html')
     path = request.path.split('/')[1]
-    return render_to_response('perm_manage/user_perm.html',{'user':request.user.username,
+    return render(request,'perm_manage/user_perm.html',{'user':request.user.username,
                                                            'path1':'perm_manage',
                                                            'path2':path,
                                                            'page_name1':u'权限管理',
@@ -173,9 +173,9 @@ def user_perm_del(request):
 @login_required
 def server_group(request):
     if not request.user.is_superuser:
-        return render_to_response('public/no_passing.html')
+        return render(request,'public/no_passing.html')
     path = request.path.split('/')[1]
-    return render_to_response('perm_manage/server_group.html',{'user':request.user.username,
+    return render(request,'perm_manage/server_group.html',{'user':request.user.username,
                                                            'path1':'perm_manage',
                                                            'path2':path,
                                                            'page_name1':u'权限管理',

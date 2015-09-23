@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.http import HttpResponseRedirect,HttpResponse
 from django.utils.log import logger
 from django.contrib import auth
@@ -16,9 +16,9 @@ from BearCatOMS.settings import CENTER_SERVER
 def audit_log(request):
     flag = check_permission(u'操作日志',request.user.username)
     if flag < 1:
-        return render_to_response('public/no_passing.html')
+        return render(request,request,'public/no_passing.html')
     path = request.path.split('/')[1]
-    return render_to_response('audit/audit_log.html',{'user':request.user.username,
+    return render(request,'audit/audit_log.html',{'user':request.user.username,
                                                            'path1':'audit',
                                                            'path2':path,
                                                            'page_name1':u'运维审计',

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.http import HttpResponseRedirect,HttpResponse
 from django.utils.log import logger
 from django.contrib import auth
@@ -13,9 +13,9 @@ from libs.check_perm import check_permission
 def assets_asset(request):
     flag = check_permission(u'资产出入库',request.user.username)
     if flag < 1:
-        return render_to_response('public/no_passing.html')
+        return render(request,'public/no_passing.html')
     path = request.path.split('/')[1]
-    return render_to_response('assets/assets_asset.html',{'user':request.user.username,
+    return render(request,'assets/assets_asset.html',{'user':request.user.username,
                                                            'path1':'assets',
                                                            'path2':path,
                                                            'page_name1':u'资产管理',
@@ -138,9 +138,9 @@ def assets_asset_del(request):
 def assets_user(request):
     flag = check_permission(u'员工资产',request.user.username)
     if flag < 1:
-        return render_to_response('public/no_passing.html')
+        return render(request,'public/no_passing.html')
     path = request.path.split('/')[1]
-    return render_to_response('assets/assets_user.html',{'user':request.user.username,
+    return render(request,'assets/assets_user.html',{'user':request.user.username,
                                                            'path1':'assets',
                                                            'path2':path,
                                                            'page_name1':u'资产管理',
@@ -303,9 +303,9 @@ def assets_user_del(request):
 def assets_log(request):
     flag = check_permission(u'出入库记录',request.user.username)
     if flag < 1:
-        return render_to_response('public/no_passing.html')
+        return render(request,'public/no_passing.html')
     path = request.path.split('/')[1]
-    return render_to_response('assets/assets_log.html',{'user':request.user.username,
+    return render(request,'assets/assets_log.html',{'user':request.user.username,
                                                            'path1':'assets',
                                                            'path2':path,
                                                            'page_name1':u'资产管理',
@@ -360,9 +360,9 @@ def assets_log_data(request):
 def assets_image(request):
     flag = check_permission(u'资产统计图',request.user.username)
     if flag < 1:
-        return render_to_response('public/no_passing.html')
+        return render(request,'public/no_passing.html')
     path = request.path.split('/')[1]
-    return render_to_response('assets/assets_image.html',{'user':request.user.username,
+    return render(request,'assets/assets_image.html',{'user':request.user.username,
                                                            'path1':'assets',
                                                            'path2':path,
                                                            'page_name1':u'资产管理',
