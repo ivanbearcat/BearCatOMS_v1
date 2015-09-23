@@ -158,7 +158,6 @@
 <script src="/static/assets/scripts/custom/table-managed.js"></script>
 
 
-
 <script type="text/javascript">
 var oTable;
 var aButtons
@@ -259,6 +258,7 @@ function loaddata() {
         "fnRowCallback": function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
         },
         "fnServerData": function (sSource, aoData, fnCallback) {
+            aoData.push({csrfmiddlewaretoken: '{{ csrf_token }}'})
             $.ajax({
                 "dataType": 'json',
                 "type": "POST",
