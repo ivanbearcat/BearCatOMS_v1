@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect,HttpResponse
 from django.utils.log import logger
 from django.contrib import auth
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 import simplejson,re
 from django.db.models.query_utils import Q
@@ -83,6 +84,7 @@ def audit_log_data(request):
     }
     return HttpResponse(simplejson.dumps(result),content_type="application/json")
 
+@csrf_exempt
 def audit_get_data(request):
     orm = server_list.objects.all()
     allow_ip_list = []
@@ -93,7 +95,7 @@ def audit_get_data(request):
         username = request.POST.get('username')
         command = request.POST.get ('command')
         time = request.POST.get ('time')
-        last_command = log.objects.all().order_by('id').reverse()[:1]
+        last_command = log.objects.filter(source_ip=ip).order_by('id').reverse()[:1]
         for i in last_command:
             if i.command == command:
                 return HttpResponse('duplicate')
