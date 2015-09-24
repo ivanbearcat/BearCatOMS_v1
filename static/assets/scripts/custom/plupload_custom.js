@@ -21,10 +21,10 @@ var PluploadCustom = function () {
             },
          
             // Flash settings
-            flash_swf_url : 'assets/plugins/plupload/js/Moxie.swf',
+            //flash_swf_url : '/static/assets/plugins/plupload/js/Moxie.swf',
      
             // Silverlight settings
-            silverlight_xap_url : 'assets/plugins/plupload/js/Moxie.xap',             
+            //silverlight_xap_url : '/static/assets/plugins/plupload/js/Moxie.xap',
             headers : {
                 "X-CSRFToken":getCookie('_csrf_token')
             },

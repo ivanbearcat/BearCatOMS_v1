@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect,HttpResponse
 from django.utils.log import logger
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 import simplejson,re,os,datetime,time,subprocess
 from ast import literal_eval
 from django.db.models.query_utils import Q
@@ -60,6 +61,7 @@ def handle_uploaded_file(request,f):
         result_code = 1
     return result_code
 
+@csrf_exempt
 @login_required
 def get_upload(request):
     file = request.FILES.get('file')

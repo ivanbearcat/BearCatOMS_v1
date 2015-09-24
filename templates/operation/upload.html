@@ -23,7 +23,7 @@
     <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn blue">
         <i class="fa fa-share"></i> 上传文件
     </a>
-<div id="html5_191s5i9758q1p7bcdq1badmjb3_container" class="moxie-shim moxie-shim-html5" style="position: absolute; top: 0px; left: 1401px; width: 113px; height: 34px; overflow: hidden; z-index: 0;"><input id="html5_191s5i9758q1p7bcdq1badmjb3" type="file" style="font-size: 999px; opacity: 0; position: absolute; top: 0px; left: 0px; width: 100%; height: 100%;display:none" multiple="" accept="image/jpeg,image/gif,image/png,application/zip"></div></div>
+<div id="html5_191s5i9758q1p7bcdq1badmjb3_container" class="moxie-shim moxie-shim-html5" style="position: absolute; top: 0px; left: 1481px; width: 130px; height: 34px; overflow: hidden; z-index: 0;"><input id="html5_191s5i9758q1p7bcdq1badmjb3" type="file" style="font-size: 999px; opacity: 0; position: absolute; top: 0px; left: 0px; width: 100%; height: 100%;display:none" multiple="" accept="image/jpeg,image/gif,image/png,application/zip"></div></div>
 <div class="row">
     <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"></div>
 </div>
@@ -146,13 +146,15 @@ $(document).ready(function () {
                             var temp = setInterval(function () {
                                 $.post('/upload_upload/', {file_name: aData[0][0], flag: 1}, function (d) {
                                     if (d.code == 0) {
-                                        $('#process').attr('style', 'width:' + d.percent);
-                                    } else {
-                                        toastr.error(d.msg)
+                                        if (d.percent == "00%") {
+                                            $('#process').attr('style', 'width: 100%');
+                                        }else{
+                                            $('#process').attr('style', 'width:' + d.percent);
+                                        }
                                     }
                                     if (d.process == 0) {
                                         $('#process').attr('style', 'width: 100%');
-                                        setTimeout('clear_percent()', 2000)
+                                        setTimeout('clear_percent()', 1000)
                                         clearInterval(temp);
                                     }
                                 })
