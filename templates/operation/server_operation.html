@@ -26,7 +26,7 @@
                         <input type="text" class="form-control tt-hint"
                                disabled="" autocomplete="off" spellcheck="false"
                                style="position: absolute; top: 0px; left: 0px; border-color: transparent; box-shadow: none; background: none 0% 0% / auto repeat scroll padding-box border-box rgb(255, 255, 255);">
-                        <div type="text" id="cmd_template"
+                        <div type="text" id="cmd_temp"
                              name="typeahead_example_modal_1"
                              class="form-control tt-input" autocomplete="off"
                              spellcheck="false" dir="auto"
@@ -148,7 +148,7 @@ var aButtons
 $(document).ready(function () {
 
     $.post('/cmd_template_dropdown/', {}, function (d) {
-        $('#cmd_template').select2({
+        $('#cmd_temp').select2({
             multiple: false,
             placeholder: '请选择模板命令',
             allowClear: true,

@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 import simplejson,re,datetime,os,pexpect,time,commands
 from perm_manage.models import server_group_list,perm
+from operation.models import server_list
 from BearCatOMS.settings import BASE_DIR,SECRET_KEY,CENTER_SERVER
 from libs import crypt
 from libs.check_perm import check_permission
@@ -100,9 +101,10 @@ def post_server_chpasswd(request):
             def gevent_run_all(server_groups,p,client_send_data,cmd,CENTER_SERVER):
                 for i in server_groups:
                     for j in i.members_server.split(','):
-                        p.spawn(gevent_run,client_send_data,i,j,cmd,CENTER_SERVER)
-            def gevent_run(client_send_data,i,j,cmd,CENTER_SERVER):
-                client_send_data("{'salt':1,'act':'cmd.run','hosts':'%s','argv':%s}" % (j,cmd.split(',,')),CENTER_SERVER[i.server_group_name][0],CENTER_SERVER[i.server_group_name][1])
+                        orm_server = server_list.objects.get(server_name=j)
+                        p.spawn(gevent_run,client_send_data,orm_server.belong_to,j,cmd,CENTER_SERVER)
+            def gevent_run(client_send_data,belong_to,j,cmd,CENTER_SERVER):
+                client_send_data("{'salt':1,'act':'cmd.run','hosts':'%s','argv':%s}" % (j,cmd.split(',,')),CENTER_SERVER[belong_to][0],CENTER_SERVER[belong_to][1])
 #                    os.system('ssh-copy-id -i /home/%s/.ssh/id_rsa.pub root@%s' % (request.user.username,j))
             p = Pool()
             p.spawn(gevent_run_all,server_groups,p,client_send_data,cmd,CENTER_SERVER)
