@@ -21,6 +21,7 @@ import socket
 import sys
 import datetime
 import MySQLdb
+from ast import literal_eval
 
 # windows does not have termios...
 try:
@@ -42,7 +43,7 @@ def posix_shell(chan,web_username,hostname):
     import select
     with open('/home/%s/.tempfile' % web_username) as f:
         DATABASES = f.readline()
-        DATABASES = eval(DATABASES)
+        DATABASES = literal_eval(DATABASES)
 
     oldtty = termios.tcgetattr(sys.stdin)
     print DATABASES['HOST'],DATABASES['USER'],DATABASES['PASSWORD'],DATABASES['NAME']

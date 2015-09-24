@@ -8,6 +8,7 @@ import time,os,yaml
 from twisted.internet import reactor
 from libs import crypt
 from libs.log_mod import logger
+from ast import literal_eval
 logger = logger()
 # from lib.data_analysis import ProtoControl
 # from lib.c_include import *
@@ -84,7 +85,7 @@ class server_protocol(Protocol):
         try:
             data = crypt.strong_decrypt(SECRET_KEY,str(data))
             print data
-            data = eval(data)
+            data = literal_eval(data)
 	    print data
             if data.get('salt') == 1:
                 result = self.factory.call_saltstack(data)

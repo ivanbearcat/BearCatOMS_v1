@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #coding:utf-8
 import os,socket,Queue
+from ast import literal_eval
 from threading import Thread
 
 class open_web_shell(object):
@@ -10,7 +11,7 @@ class open_web_shell(object):
         self.q = Queue.Queue(10)
 
     def process(self,ip_list):
-        for i in eval(ip_list):
+        for i in literal_eval(ip_list):
             port = self.port_pool.pop(0)
             self.port_pool.append(port)
             if self.port_test(i,22):

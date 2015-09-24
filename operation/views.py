@@ -4,6 +4,7 @@ from django.http import HttpResponseRedirect,HttpResponse
 from django.utils.log import logger
 from django.contrib.auth.decorators import login_required
 import simplejson,re,os,datetime,time,subprocess
+from ast import literal_eval
 from django.db.models.query_utils import Q
 from operation.models import upload_files,server_list,command_template
 from audit.models import log
@@ -424,7 +425,7 @@ def search_server_list(request):
         def gevent_run_all(CENTER_SERVER,client_send_data,server_list,p):
             for i in CENTER_SERVER.keys():
                 recv_data = client_send_data("{'salt':1,'act':'test.ping','hosts':'*','argv':[]}",CENTER_SERVER[i][0],CENTER_SERVER[i][1])
-                dict_data = eval(recv_data)
+                dict_data = literal_eval(recv_data)
                 for k,v in dict_data.items():
                     p.spawn(gevent_run,client_send_data,server_list,i,k,v,dict_data)
 
@@ -432,15 +433,15 @@ def search_server_list(request):
             uniq_test = server_list.objects.filter(server_name=k)
             if v == True and not uniq_test:
                 inner_ip = client_send_data("{'salt':1,'act':'grains.item','hosts':'%s','argv':['ipv4']}" % k,CENTER_SERVER[i][0],CENTER_SERVER[i][1])
-                inner_ip = eval(inner_ip)
+                inner_ip = literal_eval(inner_ip)
                 inner_ip[k]['ipv4'].remove('127.0.0.1')
                 # cmd = ["curl http://www.whereismyip.com/|grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'"]
                 cmd = ['curl http://members.3322.org/dyndns/getip']
                 external_ip = client_send_data("{'salt':1,'act':'cmd.run','hosts':'%s','argv':%s}" % (k,cmd),CENTER_SERVER[i][0],CENTER_SERVER[i][1])
-                external_ip = eval(external_ip)
+                external_ip = literal_eval(external_ip)
                 external_ip = external_ip[k].split('\n')[-1]
                 os = client_send_data("{'salt':1,'act':'grains.item','hosts':'%s','argv':['os']}" % k,CENTER_SERVER[i][0],CENTER_SERVER[i][1])
-                os = eval(os)
+                os = literal_eval(os)
                 belong_to = i
                 server_list.objects.create(server_name=k,inner_ip=','.join(inner_ip[k]['ipv4']),external_ip=external_ip,os=os[k]['os'],belong_to=belong_to,status=1)
             elif uniq_test:
