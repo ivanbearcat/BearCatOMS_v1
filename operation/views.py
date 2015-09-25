@@ -4,12 +4,13 @@ from django.http import HttpResponseRedirect,HttpResponse
 from django.utils.log import logger
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
-import simplejson,re,os,datetime,time,subprocess
+import simplejson,re,os,datetime,time,subprocess,commands
 from ast import literal_eval
 from django.db.models.query_utils import Q
 from operation.models import upload_files,server_list,command_template
 from audit.models import log
 from perm_manage.models import perm,server_group_list
+from saltstack.models import saltstack_state
 from django import forms
 from libs.socket_send_data import client_send_data
 from libs.str_to_html import convert_str_to_html
@@ -158,9 +159,14 @@ def upload_upload(request):
         #开始传输
         # orm = upload_files.objects.get(file_name=file_name)
         rsync_dest = request.POST.get('rsync_dest')
+        rsync_state = request.POST.get('rsync_state')
         if rsync_dest:
             rsync_ip = CENTER_SERVER[rsync_dest][0]
-            rsync_dir = CENTER_SERVER[rsync_dest][2]
+            if rsync_state:
+                master_dir = commands.getoutput('''ssh %s "grep -A2 '^file_roots' /etc/salt/master |grep 'base:' -A1|grep '-'|cut -d'-' -f2"''' % CENTER_SERVER[rsync_dest][0])
+                rsync_dir = os.path.join(master_dir,rsync_state)
+            else:
+                rsync_dir = CENTER_SERVER[rsync_dest][2]
             cmdLine = []
             cmdLine.append('rsync')
             cmdLine.append('--progress')
@@ -224,6 +230,15 @@ def rsync_dest_dropdown(request):
     for k in CENTER_SERVER.keys():
         result['rsync_dest_dropdown_list'].append({'text':k, 'id': count})
         count += 1
+    return HttpResponse(simplejson.dumps(result),content_type="application/json")
+
+@login_required
+def rsync_state_dropdown(request):
+    result = {}
+    result['rsync_state_dropdown_list'] = []
+    orm = saltstack_state.objects.all()
+    for c,i in enumerate(orm):
+        result['rsync_state_dropdown_list'].append({'text':i.name, 'id': c})
     return HttpResponse(simplejson.dumps(result),content_type="application/json")
 
 @login_required

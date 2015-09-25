@@ -48,25 +48,40 @@
                         </span>
                     </div>
                 </div>
-                            <div class="input-group">
-															<span class="twitter-typeahead"
-                                                                  style="position: relative; display: inline-block;">
-                                                                <input type="text" class="form-control tt-hint"
-                                                                       disabled="" autocomplete="off" spellcheck="false"
-                                                                       style="position: absolute; top: 0px; left: 0px; border-color: transparent; box-shadow: none; background: none 0% 0% / auto repeat scroll padding-box border-box rgb(255, 255, 255);">
-                                                                <div type="text" id="rsync_dest"
-                                                                     name="typeahead_example_modal_1"
-                                                                     class="form-control tt-input" autocomplete="off"
-                                                                     spellcheck="false" dir="auto"
-                                                                     style="width: 250px;position: relative; vertical-align: top; background-color: transparent;"></div><pre
-                                                                    aria-hidden="true"
-                                                                    style="position: absolute; visibility: hidden; white-space: nowrap; font-family: 'Open Sans', sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 400; word-spacing: 0px; letter-spacing: 0px; text-indent: 0px; text-rendering: auto; text-transform: none;"></pre><span
-                                                                    class="tt-dropdown-menu"
-                                                                    style="position: absolute; top: 100%; left: 0px; z-index: 100; display: none;"><div
-                                                                    class="tt-dataset-1"></div></span></span>
-                            </div>
-
-
+                    <div class="input-group">
+                        <span class="twitter-typeahead"
+                              style="position: relative; display: inline-block;">
+                            <input type="text" class="form-control tt-hint"
+                                   disabled="" autocomplete="off" spellcheck="false"
+                                   style="position: absolute; top: 0px; left: 0px; border-color: transparent; box-shadow: none; background: none 0% 0% / auto repeat scroll padding-box border-box rgb(255, 255, 255);">
+                            <div type="text" id="rsync_dest"
+                                 name="typeahead_example_modal_1"
+                                 class="form-control tt-input" autocomplete="off"
+                                 spellcheck="false" dir="auto"
+                                 style="width: 250px;position: relative; vertical-align: top; background-color: transparent;"></div><pre
+                                aria-hidden="true"
+                                style="position: absolute; visibility: hidden; white-space: nowrap; font-family: 'Open Sans', sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 400; word-spacing: 0px; letter-spacing: 0px; text-indent: 0px; text-rendering: auto; text-transform: none;"></pre><span
+                                class="tt-dropdown-menu"
+                                style="position: absolute; top: 100%; left: 0px; z-index: 100; display: none;"><div
+                                class="tt-dataset-1"></div></span></span>
+                    </div>
+                    <div class="input-group">
+                        <span class="twitter-typeahead"
+                              style="position: relative; display: inline-block;">
+                            <input type="text" class="form-control tt-hint"
+                                   disabled="" autocomplete="off" spellcheck="false"
+                                   style="position: absolute; top: 0px; left: 0px; border-color: transparent; box-shadow: none; background: none 0% 0% / auto repeat scroll padding-box border-box rgb(255, 255, 255);">
+                            <div type="text" id="rsync_state"
+                                 name="typeahead_example_modal_1"
+                                 class="form-control tt-input" autocomplete="off"
+                                 spellcheck="false" dir="auto"
+                                 style="width: 250px;position: relative; vertical-align: top; background-color: transparent;"></div><pre
+                                aria-hidden="true"
+                                style="position: absolute; visibility: hidden; white-space: nowrap; font-family: 'Open Sans', sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 400; word-spacing: 0px; letter-spacing: 0px; text-indent: 0px; text-rendering: auto; text-transform: none;"></pre><span
+                                class="tt-dropdown-menu"
+                                style="position: absolute; top: 100%; left: 0px; z-index: 100; display: none;"><div
+                                class="tt-dataset-1"></div></span></span>
+                    </div>
                 <table class="table table-striped table-bordered table-hover table-full-width"  id="datatables">
                     <thead>
                     <tr>
@@ -128,6 +143,15 @@ $(document).ready(function () {
         });
     })
 
+    $.post('/rsync_state_dropdown/', {}, function (d) {
+        $('#rsync_state').select2({
+            multiple: false,
+            placeholder: '请选传到哪个state模块仓库',
+            allowClear: true,
+            data: d['rsync_state_dropdown_list']
+        });
+    })
+
     aButtons = [
             {
                 "sExtends": 'select',
@@ -142,6 +166,43 @@ $(document).ready(function () {
                             toastr.error('请选择中心服务器')
                         }else{
                             upload()
+                            toastr.success('文件开始传输')
+                            var temp = setInterval(function () {
+                                $.post('/upload_upload/', {file_name: aData[0][0], flag: 1}, function (d) {
+                                    if (d.code == 0) {
+                                        if (d.percent == "00%") {
+                                            $('#process').attr('style', 'width: 100%');
+                                        }else{
+                                            $('#process').attr('style', 'width:' + d.percent);
+                                        }
+                                    }
+                                    if (d.process == 0) {
+                                        $('#process').attr('style', 'width: 100%');
+                                        setTimeout('clear_percent()', 1000)
+                                        clearInterval(temp);
+                                    }
+                                })
+                            }, 1000)
+                        }
+                    }else{
+                        toastr.error('请选择要传输的文件')
+                    }
+                }
+            },
+            {
+                "sExtends": 'select',
+                "sButtonText": '<i class="fa fa-share"><font color="white"> 传到state模块仓库</font></i>',
+                "sButtonClass": "btn yellow",
+                "fnComplete": function (nButton, oConfig, nRow) {
+                    var oTT = TableTools.fnGetInstance('datatables');
+                    var aData = oTT.fnGetSelectedData();
+                    if (aData.length == 1) {
+                        var rsync_dest = $('#rsync_dest').select2('data')
+                        var rsync_state = $('#rsync_state').select2('data')
+                        if (rsync_dest == null || rsync_state == null) {
+                            toastr.error('请选择中心服务器以及state模块仓库')
+                        }else{
+                            upload_state()
                             toastr.success('文件开始传输')
                             var temp = setInterval(function () {
                                 $.post('/upload_upload/', {file_name: aData[0][0], flag: 1}, function (d) {
@@ -257,6 +318,22 @@ function upload() {
     var rsync_dest = $('#rsync_dest').select2('data')
     rsync_dest = rsync_dest["text"]
     $.post('/upload_upload/', {file_name: aData[0][0],rsync_dest: rsync_dest, flag: 0}, function (d) {
+        if (d.code == 0) {
+            toastr.success(d.msg)
+        } else {
+            toastr.error(d.msg)
+        }
+    })
+}
+
+function upload_state() {
+    var oTT = TableTools.fnGetInstance('datatables');
+    var aData = oTT.fnGetSelectedData();
+    var rsync_dest = $('#rsync_dest').select2('data')
+    rsync_dest = rsync_dest["text"]
+    var rsync_state = $('#rsync_state').select2('data')
+    rsync_state = rsync_state["text"]
+    $.post('/upload_upload/', {file_name: aData[0][0],rsync_dest: rsync_dest,rsync_state:rsync_state, flag: 0}, function (d) {
         if (d.code == 0) {
             toastr.success(d.msg)
         } else {
