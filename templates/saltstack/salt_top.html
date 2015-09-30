@@ -498,6 +498,7 @@ function run() {
                 console.info(d.cmd_results)
                 var data = d.cmd_results.replace(/stdout:&nbsp'(.*?)'<br>/g,'stdout:&nbsp\'<font color="green"><b>$1</b></font>\'<br>')
                 data = data.replace(/stderr:&nbsp'(.*?)'<br>/g,'stderr:&nbsp\'<font color="red"><b>$1</b></font>\'<br>')
+                data = data.replace(/diff:&nbsp.*?<br><br><br>(.*?)<br><br><br>.*?<br>/g,'$1<br>')
                 data = data.replace(/true/g,'<font color="green"><b>true</b></font>')
                 data = data.replace(/false/g,'<font color="red"><b>false</b></font>')
                 $('#cmd_results').html(data)
