@@ -318,11 +318,12 @@ function select_all() {
 function run_cmd() {
     $('#cmd_results').html('')
     var cmd = $('#input_cmd').val()
-    var cmd_template = $('#cmd_template').select2('data')
+    var cmd_template = $('#cmd_temp').select2('data')
     if (cmd != '' || cmd_template != null) {
         if (cmd_template != null) {
             cmd_template = cmd_template["text"]
         }
+        console.info(cmd,cmd_template)
         if (cmd != '' && cmd_template != null) {
             toastr.error('只能单独运行手动命令或者模板命令')
         } else {
