@@ -16,6 +16,7 @@ from libs.socket_send_data import client_send_data
 from libs.str_to_html import convert_str_to_html
 from BearCatOMS.settings import BASE_DIR,CENTER_SERVER
 from libs.check_perm import check_permission
+from libs.check_center_server import check_center_server_up
 from gevent import monkey; monkey.patch_socket()
 import gevent
 from gevent.pool import Pool
@@ -438,44 +439,46 @@ def get_server_list(request):
 
 @login_required
 def search_server_list(request):
-    try:
-        def gevent_run_all(CENTER_SERVER,client_send_data,server_list,p):
-            for i in CENTER_SERVER.keys():
-                recv_data = client_send_data("{'salt':1,'act':'test.ping','hosts':'*','argv':[]}",CENTER_SERVER[i][0],CENTER_SERVER[i][1])
-                dict_data = literal_eval(recv_data)
-                for k,v in dict_data.items():
-                    p.spawn(gevent_run,client_send_data,server_list,i,k,v,dict_data)
+    for k,v in CENTER_SERVER.items():
+        if not check_center_server_up(v[0],v[1]):
+            return HttpResponse(simplejson.dumps({'code':1,'msg':u'无法连接到%s' % k}),content_type="application/json")
 
-        def gevent_run(client_send_data,server_list,i,k,v,dict_data):
-            uniq_test = server_list.objects.filter(server_name=k)
-            if v == True and not uniq_test:
-                inner_ip = client_send_data("{'salt':1,'act':'grains.item','hosts':'%s','argv':['ipv4']}" % k,CENTER_SERVER[i][0],CENTER_SERVER[i][1])
-                inner_ip = literal_eval(inner_ip)
-                inner_ip[k]['ipv4'].remove('127.0.0.1')
-                # cmd = ["curl http://www.whereismyip.com/|grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'"]
-                cmd = ['curl http://members.3322.org/dyndns/getip']
-                external_ip = client_send_data("{'salt':1,'act':'cmd.run','hosts':'%s','argv':%s}" % (k,cmd),CENTER_SERVER[i][0],CENTER_SERVER[i][1])
-                external_ip = literal_eval(external_ip)
-                external_ip = external_ip[k].split('\n')[-1]
-                os = client_send_data("{'salt':1,'act':'grains.item','hosts':'%s','argv':['os']}" % k,CENTER_SERVER[i][0],CENTER_SERVER[i][1])
-                os = literal_eval(os)
-                belong_to = i
-                server_list.objects.create(server_name=k,inner_ip=','.join(inner_ip[k]['ipv4']),external_ip=external_ip,os=os[k]['os'],belong_to=belong_to,status=1)
-            elif uniq_test:
-                orm_server = server_list.objects.get(server_name=k)
-                orm_server.status = 1
-                orm_server.save()
-            for i in server_list.objects.filter(belong_to=i):
-                if not i.server_name in dict_data.keys():
-                    i.status = 0
-                    i.save()
-        p = Pool()
-        p.spawn(gevent_run_all,CENTER_SERVER,client_send_data,server_list,p)
-        p.join()
-        return HttpResponse(simplejson.dumps({'code':0,'msg':u'获取完成'}),content_type="application/json")
-    except Exception,e:
-        logger.error(e)
-        return HttpResponse(simplejson.dumps({'code':1,'msg':u'获取失败'}),content_type="application/json")
+
+
+    def gevent_run_all(CENTER_SERVER,client_send_data,server_list,p):
+        for i in CENTER_SERVER.keys():
+            recv_data = client_send_data("{'salt':1,'act':'test.ping','hosts':'*','argv':[]}",CENTER_SERVER[i][0],CENTER_SERVER[i][1])
+            dict_data = literal_eval(recv_data)
+            for k,v in dict_data.items():
+                p.spawn(gevent_run,client_send_data,server_list,i,k,v,dict_data)
+
+    def gevent_run(client_send_data,server_list,i,k,v,dict_data):
+        uniq_test = server_list.objects.filter(server_name=k)
+        if v == True and not uniq_test:
+            inner_ip = client_send_data("{'salt':1,'act':'grains.item','hosts':'%s','argv':['ipv4']}" % k,CENTER_SERVER[i][0],CENTER_SERVER[i][1])
+            inner_ip = literal_eval(inner_ip)
+            inner_ip[k]['ipv4'].remove('127.0.0.1')
+            # cmd = ["curl http://www.whereismyip.com/|grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'"]
+            cmd = ['curl http://members.3322.org/dyndns/getip']
+            external_ip = client_send_data("{'salt':1,'act':'cmd.run','hosts':'%s','argv':%s}" % (k,cmd),CENTER_SERVER[i][0],CENTER_SERVER[i][1])
+            external_ip = literal_eval(external_ip)
+            external_ip = external_ip[k].split('\n')[-1]
+            os = client_send_data("{'salt':1,'act':'grains.item','hosts':'%s','argv':['os']}" % k,CENTER_SERVER[i][0],CENTER_SERVER[i][1])
+            os = literal_eval(os)
+            belong_to = i
+            server_list.objects.create(server_name=k,inner_ip=','.join(inner_ip[k]['ipv4']),external_ip=external_ip,os=os[k]['os'],belong_to=belong_to,status=1)
+        elif uniq_test:
+            orm_server = server_list.objects.get(server_name=k)
+            orm_server.status = 1
+            orm_server.save()
+        for i in server_list.objects.filter(belong_to=i):
+            if not i.server_name in dict_data.keys():
+                i.status = 0
+                i.save()
+    p = Pool()
+    p.spawn(gevent_run_all,CENTER_SERVER,client_send_data,server_list,p)
+    p.join()
+    return HttpResponse(simplejson.dumps({'code':0,'msg':u'获取完成'}),content_type="application/json")
 
 @login_required
 def run_cmd(request):
@@ -486,6 +489,10 @@ def run_cmd(request):
         belong_tos = belong_tos.split(',')
         cmd = request.POST.get('cmd')
         cmd_template = request.POST.get('cmd_template')
+
+        for center_server in belong_tos:
+            if not check_center_server_up(CENTER_SERVER[center_server][0],CENTER_SERVER[center_server][1]):
+                return HttpResponse(simplejson.dumps({'code':1,'msg':u'无法连接到%s' % center_server}),content_type="application/json")
 
         time_now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         servers = {}

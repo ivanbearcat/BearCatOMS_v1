@@ -7,6 +7,7 @@ from django.db.models.query_utils import Q
 from libs.check_perm import check_permission
 from libs.socket_send_data import client_send_data
 from libs.str_to_html import convert_str_to_html
+from libs.check_center_server import check_center_server_up
 from BearCatOMS.settings import CENTER_SERVER
 from saltstack.models import saltstack_state,saltstack_top,saltstack_pillar
 from operation.models import server_list
@@ -195,6 +196,10 @@ def salt_top_run(request):
     center_server = request.POST.get('center_server')
     run_target = request.POST.get('run_target')
     state = request.POST.get('state')
+
+    if not check_center_server_up(CENTER_SERVER[center_server][0],CENTER_SERVER[center_server][1]):
+        return HttpResponse(simplejson.dumps({'code':1,'msg':u'无法连接到%s' % center_server, 'cmd_results':''}),content_type="application/json")
+
     run_target_dict = {}
     target = []
     cmd_results = ''

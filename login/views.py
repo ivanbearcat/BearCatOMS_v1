@@ -27,6 +27,7 @@ def login_auth(request):
         next_page = request.session.get('next')
         if next_page:
             request.session.pop('next')
+            print request.session.get('next')
             return HttpResponseRedirect(next_page)
         else:
             return HttpResponseRedirect('/main/')
