@@ -197,8 +197,9 @@ def salt_top_run(request):
     run_target = request.POST.get('run_target')
     state = request.POST.get('state')
 
-    if not check_center_server_up(CENTER_SERVER[center_server][0],CENTER_SERVER[center_server][1]):
-        return HttpResponse(simplejson.dumps({'code':1,'msg':u'无法连接到%s' % center_server, 'cmd_results':''}),content_type="application/json")
+    for server in center_server.split('|'):
+        if not check_center_server_up(CENTER_SERVER[server][0],CENTER_SERVER[server][1]):
+            return HttpResponse(simplejson.dumps({'code':1,'msg':u'无法连接到%s' % server, 'cmd_results':''}),content_type="application/json")
 
     run_target_dict = {}
     target = []

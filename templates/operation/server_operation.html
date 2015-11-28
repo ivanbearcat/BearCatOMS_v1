@@ -179,18 +179,18 @@ $(document).ready(function () {
             },
             {
                 "sExtends": 'select',
-                "sButtonText": '<font color="white">执行命令</font><i class="fa fa-toggle-right"></i>',
-                "sButtonClass": "btn blue",
-                "fnComplete": function (nButton, oConfig, nRow) {
-                    run_cmd_verify()
-                }
-            },
-            {
-                "sExtends": 'select',
                 "sButtonText": '<font color="white">删除服务器</font><i class="fa fa-times"></i>',
                 "sButtonClass": "btn red",
                 "fnComplete": function (nButton, oConfig, nRow) {
                     del()
+                }
+            },
+            {
+                "sExtends": 'select',
+                "sButtonText": '<font color="white">执行命令</font><i class="fa fa-toggle-right"></i>',
+                "sButtonClass": "btn blue",
+                "fnComplete": function (nButton, oConfig, nRow) {
+                    run_cmd_verify()
                 }
             }
 {#            {#}
