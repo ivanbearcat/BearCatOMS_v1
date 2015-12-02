@@ -139,6 +139,7 @@
                 <form action="#" class="form-horizontal form-row-seperated">
                     <div class="form-group">
                         <label class="col-sm-4 control-label" style="text-align:center;width:100%"><h4>您确定要执行吗</h4></label>
+                        <label id="modal_text" class="col-sm-4 control-label" style="text-align:center;width:100%"></label>
                         <div class="col-sm-8">
                             <div class="input-group">
                                 <span class="twitter-typeahead"
@@ -472,7 +473,18 @@ function select_all() {
 }
 
 function run_verify() {
+    $('#modal_text').empty()
+    var oTT = TableTools.fnGetInstance('datatables');
+    var aData = oTT.fnGetSelectedData();
+    if (aData.length > 0) {
+        $("#modal_text").append('<h5><b>主机&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp模块</b></h5>')
+        for (var i in aData) {
+            $("#modal_text").append('<h6><b>' + aData[i][1] + '</b>&nbsp&nbsp&nbsp&nbsp<=>&nbsp&nbsp&nbsp&nbsp<b>' + aData[i][2] + '</b></h6>')
+        }
         $("#myModal2").modal('show')
+    }else{
+        toastr.error('请选择目标主机')
+    }
 }
 
 function run() {

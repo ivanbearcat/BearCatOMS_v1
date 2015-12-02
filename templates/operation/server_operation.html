@@ -103,6 +103,7 @@
                 <form action="#" class="form-horizontal form-row-seperated">
                     <div class="form-group">
                         <label class="col-sm-4 control-label" style="text-align:center;width:100%"><h4>您确定要执行吗</h4></label>
+                        <label id="modal_text" class="col-sm-4 control-label" style="text-align:center;width:100%"></label>
                         <div class="col-sm-8">
                             <div class="input-group">
                                 <span class="twitter-typeahead"
@@ -319,51 +320,83 @@ function run_cmd() {
     $('#cmd_results').html('')
     var cmd = $('#input_cmd').val()
     var cmd_template = $('#cmd_temp').select2('data')
+{#    if (cmd != '' || cmd_template != null) {#}
+    if (cmd_template != null) {
+        cmd_template = cmd_template["text"]
+    }
+{#        if (cmd != '' && cmd_template != null) {#}
+{#            toastr.error('只能单独运行手动命令或者模板命令')#}
+{#        } else {#}
+    var oTT = TableTools.fnGetInstance('datatables');
+    var aData = oTT.fnGetSelectedData();
+    if (aData.length != 0) {
+        showAjaxLoad()
+        var server_names = []
+        var belong_tos = []
+        for (var i in aData) {
+            server_names.push(aData[i][0])
+            belong_tos.push(aData[i][4])
+        }
+        server_names = server_names.join(',')
+        belong_tos = belong_tos.join(',')
+        $.post('/run_cmd/', {
+            server_names: server_names,
+            cmd: cmd,
+            cmd_template: cmd_template,
+            belong_tos: belong_tos
+        }, function (d) {
+            hideAjaxLoad()
+            if (d.code == 0) {
+                $('#cmd_results').html(d.cmd_results)
+                toastr.success(d.msg)
+                $("#myModal").modal('show')
+            } else {
+                toastr.error(d.msg)
+            }
+        })
+    }
+{#        }#}
+{#    }else{#}
+{#        toastr.error('不能运行空命令')#}
+{#    }#}
+    $("#myModal2").modal('hide')
+}
+
+function run_cmd_verify() {
+    $("#modal_text").empty()
+    var cmd = $('#input_cmd').val()
+    var cmd_template = $('#cmd_temp').select2('data')
     if (cmd != '' || cmd_template != null) {
         if (cmd_template != null) {
-            cmd_template = cmd_template["text"]
+            var command = cmd_template["text"]
+        }else{
+            var command = cmd
         }
-        console.info(cmd,cmd_template)
         if (cmd != '' && cmd_template != null) {
             toastr.error('只能单独运行手动命令或者模板命令')
         } else {
+            $("#modal_text").append('<h5 style="padding-right:15%"><b>命令：</b></h5>')
+            $("#modal_text").append('<h5>'+command+'</h5>')
+            $("#modal_text").append('<h5 style="padding-right:15%"><b>主机：</b></h5>')
             var oTT = TableTools.fnGetInstance('datatables');
             var aData = oTT.fnGetSelectedData();
             if (aData.length != 0) {
-                showAjaxLoad()
-                var server_names = []
-                var belong_tos = []
                 for (var i in aData) {
-                    server_names.push(aData[i][0])
-                    belong_tos.push(aData[i][4])
+                    $("#modal_text").append('<h5>'+aData[i][0]+'</h5>')
                 }
-                server_names = server_names.join(',')
-                belong_tos = belong_tos.join(',')
-                $.post('/run_cmd/', {
-                    server_names: server_names,
-                    cmd: cmd,
-                    cmd_template: cmd_template,
-                    belong_tos: belong_tos
-                }, function (d) {
-                    hideAjaxLoad()
-                    if (d.code == 0) {
-                        $('#cmd_results').html(d.cmd_results)
-                        toastr.success(d.msg)
-                        $("#myModal").modal('show')
-                    } else {
-                        toastr.error(d.msg)
-                    }
-                })
+
+                $("#myModal2").modal('show')
+
+            }else{
+                toastr.error('请选择服务器')
             }
         }
     }else{
         toastr.error('不能运行空命令')
     }
-    $("#myModal2").modal('hide')
-}
 
-function run_cmd_verify() {
-        $("#myModal2").modal('show')
+
+
 }
 
 function del() {
