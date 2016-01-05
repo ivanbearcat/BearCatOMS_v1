@@ -512,7 +512,7 @@ def run_cmd(request):
                     cmd_results = cmd_results + '<br><br><br><br>' + cmd_result
             if cmd_template:
                 orm = command_template.objects.get(description=cmd_template)
-                command = '''echo '%s' > /tmp/tempfile && bash /tmp/tempfile;rm -rf /tmp/tempfile''' % orm.cmd
+                command = '''echo '%s' > /tmp/tempfile && if awk 'FNR==1' /tmp/tempfile|grep python > /dev/null 2>&1;then python /tmp/tempfile;else bash /tmp/tempfile;fi;rm -rf /tmp/tempfile''' % re.sub(r"'",'''\'"'"\'''',orm.cmd)
                 cmd_result = client_send_data("{'salt':1,'act':'cmd.run','hosts':'%s','argv':%s}" % (v,command.split(',,')),CENTER_SERVER[k][0],CENTER_SERVER[k][1])
                 cmd_result = convert_str_to_html(cmd_result)
                 if cmd_results:
