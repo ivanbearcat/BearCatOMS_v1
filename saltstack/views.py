@@ -338,8 +338,8 @@ def salt_state_save(request):
             orm = saltstack_state.objects.get(id=_id)
             # old_name = orm.name
             orm.center_server = center_server
-        orm.content = content
-        orm.save()
+            orm.content = content
+            orm.save()
             # if name != old_name:
             #     os.system('''ssh %s "rm -r %s/%s"''' % (CENTER_SERVER[i][0],master_dir,old_name))
 
