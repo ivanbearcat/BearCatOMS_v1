@@ -11,7 +11,7 @@ from BearCatOMS.settings import BASE_DIR,SECRET_KEY,CENTER_SERVER
 from libs import crypt
 from libs.check_perm import check_permission
 from libs.socket_send_data import client_send_data
-from gevent import monkey; monkey.patch_socket()
+# from gevent import monkey; monkey.patch_socket()
 import gevent
 from gevent.pool import Pool
 

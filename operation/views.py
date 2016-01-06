@@ -17,7 +17,8 @@ from libs.str_to_html import convert_str_to_html
 from BearCatOMS.settings import BASE_DIR,CENTER_SERVER
 from libs.check_perm import check_permission
 from libs.check_center_server import check_center_server_up
-from gevent import monkey; monkey.patch_socket()
+
+# from gevent import monkey; monkey.patch_socket()
 import gevent
 from gevent.pool import Pool
 

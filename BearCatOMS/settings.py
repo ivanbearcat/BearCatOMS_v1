@@ -188,5 +188,5 @@ SESSION_COOKIE_AGE = 600
 #FILE_UPLOAD_TEMP_DIR = 'tmp'
 
 #custom
-CENTER_SERVER = {u'金山云':['123.59.107.121',7777,'/work/center_server/uploads/.',1],
-                 u'上海金山云':['120.92.229.166',7777,'/work/center_server/uploads/.',2]}
+CENTER_SERVER = {u'金山云':['123.59.107.121',7777,'/work/center_server/uploads/.',1,'salt-master'],
+                 u'上海金山云':['120.92.229.166',7777,'/work/center_server/uploads/.',2,'shanghai-salt-master']}

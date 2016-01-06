@@ -8,13 +8,15 @@ from libs.check_perm import check_permission
 from libs.socket_send_data import client_send_data
 from libs.str_to_html import convert_str_to_html
 from libs.check_center_server import check_center_server_up
+from libs.remote_run_cmd import r_cmd
 from BearCatOMS.settings import CENTER_SERVER
 from saltstack.models import saltstack_state,saltstack_top,saltstack_pillar
 from operation.models import server_list
 from audit.models import log
 from perm_manage.models import perm,server_group_list
-import simplejson,os,commands,datetime,re
-from gevent import monkey; monkey.patch_socket()
+import simplejson,os,commands,datetime,re,paramiko
+
+# from gevent import monkey; monkey.patch_socket()
 import gevent
 from gevent.queue import Queue
 from gevent.pool import Pool
@@ -327,15 +329,17 @@ def salt_state_save(request):
     try:
         for i in center_server.split(','):
             master_dir = commands.getoutput('''ssh %s "grep -A2 '^file_roots' /etc/salt/master |grep 'base:' -A1|grep '-'|cut -d'-' -f2"''' % CENTER_SERVER[i][0])
-            os.system('''ssh %s "mkdir -p %s/%s;cat > %s/%s/init.sls << EOF\n%s\nEOF"''' % (CENTER_SERVER[i][0],master_dir,name,master_dir,name,content))
+            # os.system('''ssh %s "mkdir -p %s/%s;cat > %s/%s/init.sls << EOF\n%s\nEOF"''' % (CENTER_SERVER[i][0],master_dir,name,master_dir,name,content))
+            cmd = '''mkdir -p %s/%s;cat > %s/%s/init.sls << EOF\n%s\nEOF''' % (master_dir,name,master_dir,name,content)
+            r_cmd(CENTER_SERVER[i][0],cmd)
         if _id =='':
             saltstack_state.objects.create(center_server=center_server,name=name,content=content)
         else:
             orm = saltstack_state.objects.get(id=_id)
             # old_name = orm.name
             orm.center_server = center_server
-            orm.content = content
-            orm.save()
+        orm.content = content
+        orm.save()
             # if name != old_name:
             #     os.system('''ssh %s "rm -r %s/%s"''' % (CENTER_SERVER[i][0],master_dir,old_name))
 
