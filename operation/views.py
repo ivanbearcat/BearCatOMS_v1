@@ -4,7 +4,7 @@ from django.http import HttpResponseRedirect,HttpResponse
 from django.utils.log import logger
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
-import simplejson,re,os,datetime,time,subprocess,commands
+import simplejson,re,os,datetime,time,subprocess,commands,json
 from ast import literal_eval
 from django.db.models.query_utils import Q
 from operation.models import upload_files,server_list,command_template
@@ -448,7 +448,7 @@ def search_server_list(request):
 
     def gevent_run_all(CENTER_SERVER,client_send_data,server_list,p):
         for i in CENTER_SERVER.keys():
-            recv_data = client_send_data("{'salt':1,'act':'test.ping','hosts':'*','argv':[]}",CENTER_SERVER[i][0],CENTER_SERVER[i][1])
+            recv_data = client_send_data(json.dumps({'salt':1,'act':'test.ping','hosts':'*','argv':[]}),CENTER_SERVER[i][0],CENTER_SERVER[i][1])
             dict_data = literal_eval(recv_data)
             for k,v in dict_data.items():
                 p.spawn(gevent_run,client_send_data,server_list,i,k,v,dict_data)
@@ -456,15 +456,15 @@ def search_server_list(request):
     def gevent_run(client_send_data,server_list,i,k,v,dict_data):
         uniq_test = server_list.objects.filter(server_name=k)
         if v == True and not uniq_test:
-            inner_ip = client_send_data("{'salt':1,'act':'grains.item','hosts':'%s','argv':['ipv4']}" % k,CENTER_SERVER[i][0],CENTER_SERVER[i][1])
+            inner_ip = client_send_data(json.dumps({'salt':1,'act':'grains.item','hosts':k,'argv':['ipv4']}),CENTER_SERVER[i][0],CENTER_SERVER[i][1])
             inner_ip = literal_eval(inner_ip)
             inner_ip[k]['ipv4'].remove('127.0.0.1')
             # cmd = ["curl http://www.whereismyip.com/|grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'"]
             cmd = ['curl http://members.3322.org/dyndns/getip']
-            external_ip = client_send_data("{'salt':1,'act':'cmd.run','hosts':'%s','argv':%s}" % (k,cmd),CENTER_SERVER[i][0],CENTER_SERVER[i][1])
+            external_ip = client_send_data(json.dumps({'salt':1,'act':'cmd.run','hosts':k,'argv':cmd}),CENTER_SERVER[i][0],CENTER_SERVER[i][1])
             external_ip = literal_eval(external_ip)
             external_ip = external_ip[k].split('\n')[-1]
-            os = client_send_data("{'salt':1,'act':'grains.item','hosts':'%s','argv':['os']}" % k,CENTER_SERVER[i][0],CENTER_SERVER[i][1])
+            os = client_send_data(json.dumps({'salt':1,'act':'grains.item','hosts':k,'argv':['os']}),CENTER_SERVER[i][0],CENTER_SERVER[i][1])
             os = literal_eval(os)
             belong_to = i
             server_list.objects.create(server_name=k,inner_ip=','.join(inner_ip[k]['ipv4']),external_ip=external_ip,os=os[k]['os'],belong_to=belong_to,status=1)
@@ -505,7 +505,7 @@ def run_cmd(request):
         for k,v in servers.items():
             v = ','.join(v)
             if cmd:
-                cmd_result = client_send_data("{'salt':1,'act':'cmd.run','hosts':'%s','argv':%s}" % (v,cmd.split(',,')),CENTER_SERVER[k][0],CENTER_SERVER[k][1])
+                cmd_result = client_send_data(json.dumps({'salt':1,'act':'cmd.run','hosts':v,'argv':cmd.split(',,')}),CENTER_SERVER[k][0],CENTER_SERVER[k][1])
                 cmd_result = convert_str_to_html(cmd_result)
                 if not cmd_results:
                     cmd_results = cmd_result
@@ -514,7 +514,7 @@ def run_cmd(request):
             if cmd_template:
                 orm = command_template.objects.get(description=cmd_template)
                 command = '''echo '%s' > /tmp/tempfile && if awk 'FNR==1' /tmp/tempfile|grep python > /dev/null 2>&1;then python /tmp/tempfile;else bash /tmp/tempfile;fi;rm -rf /tmp/tempfile''' % re.sub(r"'",'''\'"'"\'''',orm.cmd)
-                cmd_result = client_send_data("{'salt':1,'act':'cmd.run','hosts':'%s','argv':%s}" % (v,command.split(',,')),CENTER_SERVER[k][0],CENTER_SERVER[k][1])
+                cmd_result = client_send_data(json.dumps({'salt':1,'act':'cmd.run','hosts':v,'argv':command.split(',,')}),CENTER_SERVER[k][0],CENTER_SERVER[k][1])
                 cmd_result = convert_str_to_html(cmd_result)
                 if cmd_results:
                     cmd_results = cmd_result

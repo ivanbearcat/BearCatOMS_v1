@@ -4,7 +4,7 @@ from django.http import HttpResponseRedirect,HttpResponse
 from django.utils.log import logger
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-import simplejson,re,datetime,os,pexpect,time,commands
+import simplejson,re,datetime,os,pexpect,time,commands,json
 from perm_manage.models import server_group_list,perm
 from operation.models import server_list
 from BearCatOMS.settings import BASE_DIR,SECRET_KEY,CENTER_SERVER
@@ -104,7 +104,7 @@ def post_server_chpasswd(request):
                         orm_server = server_list.objects.get(server_name=j)
                         p.spawn(gevent_run,client_send_data,orm_server.belong_to,j,cmd,CENTER_SERVER)
             def gevent_run(client_send_data,belong_to,j,cmd,CENTER_SERVER):
-                client_send_data("{'salt':1,'act':'cmd.run','hosts':'%s','argv':%s}" % (j,cmd.split(',,')),CENTER_SERVER[belong_to][0],CENTER_SERVER[belong_to][1])
+                client_send_data(json.dumps({'salt':1,'act':'cmd.run','hosts':j,'argv':cmd.split(',,')}),CENTER_SERVER[belong_to][0],CENTER_SERVER[belong_to][1])
 #                    os.system('ssh-copy-id -i /home/%s/.ssh/id_rsa.pub root@%s' % (request.user.username,j))
             p = Pool()
             p.spawn(gevent_run_all,server_groups,p,client_send_data,cmd,CENTER_SERVER)

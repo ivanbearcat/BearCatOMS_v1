@@ -14,7 +14,7 @@ from saltstack.models import saltstack_state,saltstack_top,saltstack_pillar
 from operation.models import server_list
 from audit.models import log
 from perm_manage.models import perm,server_group_list
-import simplejson,os,commands,datetime,re,paramiko
+import simplejson,os,commands,datetime,re,paramiko,json
 
 # from gevent import monkey; monkey.patch_socket()
 import gevent
@@ -236,7 +236,7 @@ def salt_top_run(request):
                 for j in run_target_dict[i]:
                     p.spawn(gevent_run,CENTER_SERVER,client_send_data,i,j[0],q)
         def gevent_run(CENTER_SERVER,client_send_data,i,j,q):
-            cmd_result = client_send_data("{'salt':1,'act':'state.highstate','hosts':'%s','argv':''}" % j,CENTER_SERVER[i][0],CENTER_SERVER[i][1])
+            cmd_result = client_send_data(json.dumps({'salt':1,'act':'state.highstate','hosts':j,'argv':''}),CENTER_SERVER[i][0],CENTER_SERVER[i][1])
             cmd_result = convert_str_to_html(cmd_result)
             q.put(cmd_result)
         p = Pool()
