@@ -4,7 +4,7 @@ from django.http import HttpResponseRedirect,HttpResponse
 from django.utils.log import logger
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-import simplejson,re,datetime,os,pexpect,time,commands,json
+import re,datetime,os,pexpect,time,commands,json
 from perm_manage.models import server_group_list,perm
 from operation.models import server_list
 from BearCatOMS.settings import BASE_DIR,SECRET_KEY,CENTER_SERVER
@@ -53,7 +53,7 @@ def post_chpasswd(request):
         except Exception,e:
             code = 4
             msg = u'密码修改失败'
-    return HttpResponse(simplejson.dumps({'code':code,'msg':msg}),content_type="application/json")
+    return HttpResponse(json.dumps({'code':code,'msg':msg}),content_type="application/json")
 
 @login_required
 def post_server_chpasswd(request):
@@ -88,11 +88,11 @@ def post_server_chpasswd(request):
                 p.sendline()
                 time.sleep(3)
                 if code:
-                    return HttpResponse(simplejson.dumps({'code':code,'msg':'密码修改失败'}),content_type="application/json")
+                    return HttpResponse(json.dumps({'code':code,'msg':'密码修改失败'}),content_type="application/json")
             else:
                 code = os.system('usermod -e $(date "+%D" -d "+3 months") ' + request.user.username + ' && echo ' + server_password_new_again + '|passwd --stdin ' + request.user.username)
                 if code:
-                    return HttpResponse(simplejson.dumps({'code':code,'msg':'密码修改失败'}),content_type="application/json")
+                    return HttpResponse(json.dumps({'code':code,'msg':'密码修改失败'}),content_type="application/json")
             # with open('/home/%s/.ssh/id_rsa.pub' % request.user.username) as f:
             #     public_key = f.readline()
             public_key = commands.getoutput('cat /home/%s/.ssh/id_rsa.pub' % request.user.username)
@@ -119,4 +119,4 @@ def post_server_chpasswd(request):
         except Exception,e:
             code = 5
             msg = u'密码修改失败'
-    return HttpResponse(simplejson.dumps({'code':code,'msg':msg}),content_type="application/json")
+    return HttpResponse(json.dumps({'code':code,'msg':msg}),content_type="application/json")

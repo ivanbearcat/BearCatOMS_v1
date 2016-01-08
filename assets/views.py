@@ -4,10 +4,10 @@ from django.http import HttpResponseRedirect,HttpResponse
 from django.utils.log import logger
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
-import simplejson
 from django.db.models.query_utils import Q
 from assets.models import asset,user,log
 from libs.check_perm import check_permission
+import json
 
 @login_required
 def assets_asset(request):
@@ -84,7 +84,7 @@ def assets_asset_data(request):
                'iTotalDisplayRecords':iTotalRecords,
                'aaData':aaData
     }
-    return HttpResponse(simplejson.dumps(result),content_type="application/json")
+    return HttpResponse(json.dumps(result),content_type="application/json")
 
 @login_required
 def assets_asset_save(request):
@@ -110,26 +110,26 @@ def assets_asset_save(request):
     try:
         orm_log.save()
         orm.save()
-        return HttpResponse(simplejson.dumps({'code':0,'msg':u'保存成功'}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':0,'msg':u'保存成功'}),content_type="application/json")
     except Exception,e:
         logger.error(e,comment)
-        return HttpResponse(simplejson.dumps({'code':1,'msg':str(e)}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':1,'msg':str(e)}),content_type="application/json")
 
 @login_required
 def assets_asset_del(request):
     _id = request.POST.get('id')
     orm = asset.objects.get(id=_id)
     if orm.status == u'已发放':
-        return HttpResponse(simplejson.dumps({'code':2,'msg':u'该物品已被发放，请收回后再删除'}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':2,'msg':u'该物品已被发放，请收回后再删除'}),content_type="application/json")
     else:
         comment_info = u'%s %s %s 出库' % (orm.name,orm.assets_type,orm.assets_code)
         orm_log = log(comment=comment_info)
         try:
             orm_log.save()
             orm.delete()
-            return HttpResponse(simplejson.dumps({'code':0,'msg':u'删除成功'}),content_type="application/json")
+            return HttpResponse(json.dumps({'code':0,'msg':u'删除成功'}),content_type="application/json")
         except Exception,e:
-            return HttpResponse(simplejson.dumps({'code':1,'msg':str(e)}),content_type="application/json")
+            return HttpResponse(json.dumps({'code':1,'msg':str(e)}),content_type="application/json")
 
 
 
@@ -160,7 +160,7 @@ def assets_user_dropdown(request):
     result_data = asset.objects.filter(status=u'未发放')
     for i in result_data:
         result['list'].append({'text':i.name + ' ' + i.assets_type + ' ' + i.assets_code,'id':i.id})
-    return HttpResponse(simplejson.dumps(result),content_type="application/json")
+    return HttpResponse(json.dumps(result),content_type="application/json")
 
 
 
@@ -223,7 +223,7 @@ def assets_user_data(request):
                'iTotalDisplayRecords':iTotalRecords,
                'aaData':aaData
     }
-    return HttpResponse(simplejson.dumps(result),content_type="application/json")
+    return HttpResponse(json.dumps(result),content_type="application/json")
 
 @login_required
 def assets_user_save(request):
@@ -277,10 +277,10 @@ def assets_user_save(request):
             orm.comment = comment
             orm.assets_id = assets
             orm.save()
-        return HttpResponse(simplejson.dumps({'code':0,'msg':u'保存成功'}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':0,'msg':u'保存成功'}),content_type="application/json")
     except Exception,e:
         logger.error(e,comment)
-        return HttpResponse(simplejson.dumps({'code':1,'msg':str(e)}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':1,'msg':str(e)}),content_type="application/json")
 
 @login_required
 def assets_user_del(request):
@@ -295,9 +295,9 @@ def assets_user_del(request):
             orm_log = log(comment=comment_info)
             orm_log.save()
         orm.delete()
-        return HttpResponse(simplejson.dumps({'code':0,'msg':u'删除成功'}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':0,'msg':u'删除成功'}),content_type="application/json")
     except Exception,e:
-        return HttpResponse(simplejson.dumps({'code':0,'msg':e}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':0,'msg':e}),content_type="application/json")
 
 @login_required
 def assets_log(request):
@@ -354,7 +354,7 @@ def assets_log_data(request):
                'iTotalDisplayRecords':iTotalRecords,
                'aaData':aaData
     }
-    return HttpResponse(simplejson.dumps(result),content_type="application/json")
+    return HttpResponse(json.dumps(result),content_type="application/json")
 
 @login_required
 def assets_image(request):
@@ -393,6 +393,6 @@ def assets_get_data(request):
     for i in assets_list_uniq:
         orm['data'].append({'name':i, 'data':list(detail[num])})
         num += 1
-    return HttpResponse(simplejson.dumps(orm),content_type="application/json")
+    return HttpResponse(json.dumps(orm),content_type="application/json")
 
 

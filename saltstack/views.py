@@ -14,7 +14,7 @@ from saltstack.models import saltstack_state,saltstack_top,saltstack_pillar
 from operation.models import server_list
 from audit.models import log
 from perm_manage.models import perm,server_group_list
-import simplejson,os,commands,datetime,re,paramiko,json
+import os,commands,datetime,re,paramiko,json
 
 # from gevent import monkey; monkey.patch_socket()
 import gevent
@@ -93,7 +93,7 @@ def salt_top_data(request):
                'iTotalDisplayRecords':iTotalRecords,
                'aaData':aaData
     }
-    return HttpResponse(simplejson.dumps(result),content_type="application/json")
+    return HttpResponse(json.dumps(result),content_type="application/json")
 
 @login_required
 def salt_top_save(request):
@@ -109,17 +109,17 @@ def salt_top_save(request):
             orm_server = server_list.objects.get(server_name=i)
             if center_server:
                 if orm_server.belong_to != center_server:
-                    return HttpResponse(simplejson.dumps({'code':1,'msg':u'目标主机不在同一个中心服务器上'}),content_type="application/json")
+                    return HttpResponse(json.dumps({'code':1,'msg':u'目标主机不在同一个中心服务器上'}),content_type="application/json")
             else:
                 center_server = orm_server.belong_to
             for j in state.split(','):
                 orm_state = saltstack_state.objects.get(name=j)
                 if not center_server in orm_state.center_server.split(','):
-                    return HttpResponse(simplejson.dumps({'code':1,'msg':u'目标主机的中心服务器上没有这个模块'}),content_type="application/json")
+                    return HttpResponse(json.dumps({'code':1,'msg':u'目标主机的中心服务器上没有这个模块'}),content_type="application/json")
         if _id =='':
             # for i in target.split(','):
             #     if saltstack_top.objects.filter(target=i):
-            #         return HttpResponse(simplejson.dumps({'code':1,'msg':u'目标主机已存在对应'}),content_type="application/json")
+            #         return HttpResponse(json.dumps({'code':1,'msg':u'目标主机已存在对应'}),content_type="application/json")
             #     else:
             saltstack_top.objects.create(center_server=center_server,target=target,state=state)
         else:
@@ -135,10 +135,10 @@ def salt_top_save(request):
         #         content += '    - %s\n' % j
         # content += 'EOF'
         # os.system('''ssh %s "cat > %s/top.sls << EOF\n%s"''' % (CENTER_SERVER[center_server][0],master_dir,content))
-        return HttpResponse(simplejson.dumps({'code':0,'msg':u'保存成功'}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':0,'msg':u'保存成功'}),content_type="application/json")
     except Exception,e:
         logger.error(e)
-        return HttpResponse(simplejson.dumps({'code':1,'msg':str(e)}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':1,'msg':str(e)}),content_type="application/json")
 
 @login_required
 def salt_top_dropdown(request):
@@ -179,7 +179,7 @@ def salt_top_dropdown(request):
 
 
 
-    return HttpResponse(simplejson.dumps(result),content_type="application/json")
+    return HttpResponse(json.dumps(result),content_type="application/json")
 
 @login_required
 def salt_top_del(request):
@@ -188,10 +188,10 @@ def salt_top_del(request):
         for i in target_id.split(','):
             orm = saltstack_top.objects.get(id=i)
             orm.delete()
-        return HttpResponse(simplejson.dumps({'code':0,'msg':u'删除成功'}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':0,'msg':u'删除成功'}),content_type="application/json")
     except Exception,e:
         logger.error(e)
-        return HttpResponse(simplejson.dumps({'code':1,'msg':u'删除失败'}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':1,'msg':u'删除失败'}),content_type="application/json")
 
 @login_required
 def salt_top_run(request):
@@ -201,7 +201,7 @@ def salt_top_run(request):
 
     for server in center_server.split('|'):
         if not check_center_server_up(CENTER_SERVER[server][0],CENTER_SERVER[server][1]):
-            return HttpResponse(simplejson.dumps({'code':1,'msg':u'无法连接到%s' % server, 'cmd_results':''}),content_type="application/json")
+            return HttpResponse(json.dumps({'code':1,'msg':u'无法连接到%s' % server, 'cmd_results':''}),content_type="application/json")
 
     run_target_dict = {}
     target = []
@@ -223,7 +223,7 @@ def salt_top_run(request):
                     cmd = u'state模块 < %s >' % j[1]
                     log.objects.create(source_ip=n,username=request.user.username,command=cmd,time=time_now)
                 else:
-                    return HttpResponse(simplejson.dumps({'code':1,'msg':u'目标主机不能重复','cmd_results':cmd_results}),content_type="application/json")
+                    return HttpResponse(json.dumps({'code':1,'msg':u'目标主机不能重复','cmd_results':cmd_results}),content_type="application/json")
                 content += "  '%s':\n" % n
                 for m in j[1].split(','):
                     content += '    - %s\n' % m
@@ -249,9 +249,9 @@ def salt_top_run(request):
                 cmd_results = cmd_result
             else:
                 cmd_results = cmd_results + '<br><br><br><br>' + cmd_result
-        return HttpResponse(simplejson.dumps({'code':0,'msg':u'模块执行完成','cmd_results':cmd_results}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':0,'msg':u'模块执行完成','cmd_results':cmd_results}),content_type="application/json")
     except Exception,e:
-        return HttpResponse(simplejson.dumps({'code':1,'msg':u'模块执行失败'}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':1,'msg':u'模块执行失败'}),content_type="application/json")
 
 @login_required
 def salt_state(request):
@@ -317,7 +317,7 @@ def salt_state_data(request):
                'iTotalDisplayRecords':iTotalRecords,
                'aaData':aaData
     }
-    return HttpResponse(simplejson.dumps(result),content_type="application/json")
+    return HttpResponse(json.dumps(result),content_type="application/json")
 
 @login_required
 def salt_state_save(request):
@@ -343,10 +343,10 @@ def salt_state_save(request):
             # if name != old_name:
             #     os.system('''ssh %s "rm -r %s/%s"''' % (CENTER_SERVER[i][0],master_dir,old_name))
 
-        return HttpResponse(simplejson.dumps({'code':0,'msg':u'保存成功'}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':0,'msg':u'保存成功'}),content_type="application/json")
     except Exception,e:
         logger.error(e)
-        return HttpResponse(simplejson.dumps({'code':1,'msg':str(e)}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':1,'msg':str(e)}),content_type="application/json")
 
 @login_required
 def salt_state_dropdown(request):
@@ -359,7 +359,7 @@ def salt_state_dropdown(request):
             result['edit'].append({'text':i,'id':CENTER_SERVER[i][3]})
     for i in CENTER_SERVER.keys():
         result['list'].append({'text':i,'id':CENTER_SERVER[i][3]})
-    return HttpResponse(simplejson.dumps(result),content_type="application/json")
+    return HttpResponse(json.dumps(result),content_type="application/json")
 
 @login_required
 def salt_state_del(request):
@@ -371,15 +371,15 @@ def salt_state_del(request):
             for j in i.state.split(','):
                 state_list.append(j)
         if orm.name in state_list:
-            return HttpResponse(simplejson.dumps({'code':1,'msg':u'模块已被应用无法删除'}),content_type="application/json")
+            return HttpResponse(json.dumps({'code':1,'msg':u'模块已被应用无法删除'}),content_type="application/json")
         for i in orm.center_server.split(','):
             master_dir = commands.getoutput('''ssh %s "grep -A2 '^file_roots' /etc/salt/master |grep 'base:' -A1|grep '-'|cut -d'-' -f2"''' % CENTER_SERVER[i][0])
             os.system('''ssh %s "rm -r %s/%s"''' % (CENTER_SERVER[i][0],master_dir,orm.name))
         orm.delete()
-        return HttpResponse(simplejson.dumps({'code':0,'msg':u'删除成功'}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':0,'msg':u'删除成功'}),content_type="application/json")
     except Exception,e:
         logger.error(e)
-        return HttpResponse(simplejson.dumps({'code':1,'msg':u'删除失败'}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':1,'msg':u'删除失败'}),content_type="application/json")
 
 @login_required
 def salt_pillar(request):
@@ -445,7 +445,7 @@ def salt_pillar_data(request):
                'iTotalDisplayRecords':iTotalRecords,
                'aaData':aaData
     }
-    return HttpResponse(simplejson.dumps(result),content_type="application/json")
+    return HttpResponse(json.dumps(result),content_type="application/json")
 
 @login_required
 def salt_pillar_save(request):
@@ -473,10 +473,10 @@ def salt_pillar_save(request):
             content_top += 'EOF'
             os.system('''ssh %s "cat > %s/top.sls << EOF\n%s"''' % (CENTER_SERVER[i][0],master_dir,content_top))
 
-        return HttpResponse(simplejson.dumps({'code':0,'msg':u'保存成功'}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':0,'msg':u'保存成功'}),content_type="application/json")
     except Exception,e:
         logger.error(e)
-        return HttpResponse(simplejson.dumps({'code':1,'msg':str(e)}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':1,'msg':str(e)}),content_type="application/json")
 
 @login_required
 def salt_pillar_del(request):
@@ -497,7 +497,7 @@ def salt_pillar_del(request):
             if len(re.findall(r'\n',content_top)) < 3:
                 content_top = ''
             os.system('''ssh %s "cat > %s/top.sls << EOF\n%s"''' % (CENTER_SERVER[i][0],master_dir,content_top))
-        return HttpResponse(simplejson.dumps({'code':0,'msg':u'删除成功'}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':0,'msg':u'删除成功'}),content_type="application/json")
     except Exception,e:
         logger.error(e)
-        return HttpResponse(simplejson.dumps({'code':1,'msg':u'删除失败'}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':1,'msg':u'删除失败'}),content_type="application/json")

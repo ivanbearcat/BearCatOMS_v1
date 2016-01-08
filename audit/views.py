@@ -5,7 +5,7 @@ from django.utils.log import logger
 from django.contrib import auth
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
-import simplejson,re
+import json,re
 from django.db.models.query_utils import Q
 from audit.models import log
 from operation.models import server_list
@@ -82,7 +82,7 @@ def audit_log_data(request):
                'iTotalDisplayRecords':iTotalRecords,
                'aaData':aaData
     }
-    return HttpResponse(simplejson.dumps(result),content_type="application/json")
+    return HttpResponse(json.dumps(result),content_type="application/json")
 
 @csrf_exempt
 def audit_get_data(request):

@@ -9,7 +9,7 @@ from operation.models import server_list
 from django.db.models.query_utils import Q
 from BearCatOMS.settings import BASE_DIR,SECRET_KEY
 from libs import crypt
-import simplejson,datetime,re
+import json,datetime,re
 
 
 @login_required
@@ -79,7 +79,7 @@ def user_perm_data(request):
                'iTotalDisplayRecords':iTotalRecords,
                'aaData':aaData
     }
-    return HttpResponse(simplejson.dumps(result),content_type="application/json")
+    return HttpResponse(json.dumps(result),content_type="application/json")
 
 @login_required
 def user_perm_dropdown(request):
@@ -124,7 +124,7 @@ def user_perm_dropdown(request):
     orm_server_group = server_group_list.objects.all()
     for i in orm_server_group:
         result['server_groups_list'].append({'text':i.server_group_name,'id':i.id})
-    return HttpResponse(simplejson.dumps(result),content_type="application/json")
+    return HttpResponse(json.dumps(result),content_type="application/json")
 
 @login_required
 def user_perm_save(request):
@@ -155,10 +155,10 @@ def user_perm_save(request):
             #     orm.server_password = server_password
             orm.server_groups = server_groups
             orm.save()
-        return HttpResponse(simplejson.dumps({'code':0,'msg':u'保存成功'}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':0,'msg':u'保存成功'}),content_type="application/json")
     except Exception,e:
         logger.error(e)
-        return HttpResponse(simplejson.dumps({'code':1,'msg':str(e)}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':1,'msg':str(e)}),content_type="application/json")
 
 @login_required
 def user_perm_del(request):
@@ -166,9 +166,9 @@ def user_perm_del(request):
     try:
         orm = perm.objects.get(id=_id)
         orm.delete()
-        return HttpResponse(simplejson.dumps({'code':0,'msg':u'删除成功'}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':0,'msg':u'删除成功'}),content_type="application/json")
     except Exception,e:
-        return HttpResponse(simplejson.dumps({'code':1,'msg':e}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':1,'msg':e}),content_type="application/json")
 
 @login_required
 def server_group(request):
@@ -229,7 +229,7 @@ def server_group_data(request):
                'iTotalDisplayRecords':iTotalRecords,
                'aaData':aaData
     }
-    return HttpResponse(simplejson.dumps(result),content_type="application/json")
+    return HttpResponse(json.dumps(result),content_type="application/json")
 
 @login_required
 def server_group_save(request):
@@ -247,10 +247,10 @@ def server_group_save(request):
             orm.members_server = members_server
             orm.comment = comment
             orm.save()
-        return HttpResponse(simplejson.dumps({'code':0,'msg':u'保存成功'}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':0,'msg':u'保存成功'}),content_type="application/json")
     except Exception,e:
         logger.error(e)
-        return HttpResponse(simplejson.dumps({'code':1,'msg':str(e)}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':1,'msg':str(e)}),content_type="application/json")
 
 @login_required
 def server_group_dropdown(request):
@@ -266,7 +266,7 @@ def server_group_dropdown(request):
     result_data = server_list.objects.all()
     for i in result_data:
         result['list'].append({'text':i.server_name,'id':i.id})
-    return HttpResponse(simplejson.dumps(result),content_type="application/json")
+    return HttpResponse(json.dumps(result),content_type="application/json")
 
 @login_required
 def server_group_del(request):
@@ -276,8 +276,8 @@ def server_group_del(request):
         orm_user_perm = perm.objects.all()
         for i in orm_user_perm:
             if orm.server_group_name in i.server_groups.split(','):
-                return HttpResponse(simplejson.dumps({'code':1,'msg':u'无法删除已经被分配的主机组'}),content_type="application/json")
+                return HttpResponse(json.dumps({'code':1,'msg':u'无法删除已经被分配的主机组'}),content_type="application/json")
         orm.delete()
-        return HttpResponse(simplejson.dumps({'code':0,'msg':u'删除成功'}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':0,'msg':u'删除成功'}),content_type="application/json")
     except Exception,e:
-        return HttpResponse(simplejson.dumps({'code':1,'msg':e}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':1,'msg':e}),content_type="application/json")

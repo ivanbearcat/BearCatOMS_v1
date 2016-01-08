@@ -4,7 +4,7 @@ from django.http import HttpResponseRedirect,HttpResponse
 from django.utils.log import logger
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
-import simplejson,re,os,datetime,time,subprocess,commands,json
+import re,os,datetime,time,subprocess,commands,json
 from ast import literal_eval
 from django.db.models.query_utils import Q
 from operation.models import upload_files,server_list,command_template
@@ -71,11 +71,11 @@ def get_upload(request):
     if not file == None:
         result_code = handle_uploaded_file(request,file)
         if result_code == 0:
-            return HttpResponse(simplejson.dumps({'msg': "上传成功", "code": 0}),content_type="application/json")
+            return HttpResponse(json.dumps({'msg': "上传成功", "code": 0}),content_type="application/json")
         else:
-            return HttpResponse(simplejson.dumps({'msg': "上传失败", "code": 1}),content_type="application/json")
+            return HttpResponse(json.dumps({'msg': "上传失败", "code": 1}),content_type="application/json")
     else:
-        return HttpResponse(simplejson.dumps({'msg': "上传失败", "code": 1}),content_type="application/json")
+        return HttpResponse(json.dumps({'msg': "上传失败", "code": 1}),content_type="application/json")
 
 @login_required
 def upload_data(request):
@@ -139,7 +139,7 @@ def upload_data(request):
                'iTotalDisplayRecords':iTotalRecords,
                'aaData':aaData
     }
-    return HttpResponse(simplejson.dumps(result),content_type="application/json")
+    return HttpResponse(json.dumps(result),content_type="application/json")
 
 @login_required
 def upload_del(request):
@@ -148,10 +148,10 @@ def upload_del(request):
     try:
         os.remove(BASE_DIR + '/uploads/' + orm.file_name)
         orm.delete()
-        return HttpResponse(simplejson.dumps({'code':0,'msg':u'删除成功'}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':0,'msg':u'删除成功'}),content_type="application/json")
     except Exception,e:
         logger.error(e)
-        return HttpResponse(simplejson.dumps({'code':1,'msg':str(e)}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':1,'msg':str(e)}),content_type="application/json")
 
 @login_required
 def upload_upload(request):
@@ -203,7 +203,7 @@ def upload_upload(request):
         #        print 'error info:%s' % error
             os.remove(tmpFile) #删除临时文件
             os.remove(BASE_DIR + '/tmp/percent.tmp')
-            return HttpResponse(simplejson.dumps({'code':0,'msg':u'文件传输成功'}),content_type="application/json")
+            return HttpResponse(json.dumps({'code':0,'msg':u'文件传输成功'}),content_type="application/json")
     elif int(flag) == 1:
         #获取百分比
         if os.path.exists(BASE_DIR + '/tmp/rsync_status_file.tmp'):
@@ -216,13 +216,13 @@ def upload_upload(request):
                 if data:
                     last_percent = re.search(r'\d{1,2}%$',data)
                     if last_percent:
-                        return HttpResponse(simplejson.dumps({'code':0,'percent':last_percent.group(),'process':process}),content_type="application/json")
+                        return HttpResponse(json.dumps({'code':0,'percent':last_percent.group(),'process':process}),content_type="application/json")
         else:
-            return HttpResponse(simplejson.dumps({'code':0,'percent':0,'process':process}),content_type="application/json")
+            return HttpResponse(json.dumps({'code':0,'percent':0,'process':process}),content_type="application/json")
 
     else:
         pass
-        return HttpResponse(simplejson.dumps({'code':1,'msg':u'文件传输失败'}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':1,'msg':u'文件传输失败'}),content_type="application/json")
 
 @login_required
 def rsync_dest_dropdown(request):
@@ -232,7 +232,7 @@ def rsync_dest_dropdown(request):
     for k in CENTER_SERVER.keys():
         result['rsync_dest_dropdown_list'].append({'text':k, 'id': count})
         count += 1
-    return HttpResponse(simplejson.dumps(result),content_type="application/json")
+    return HttpResponse(json.dumps(result),content_type="application/json")
 
 @login_required
 def rsync_state_dropdown(request):
@@ -241,7 +241,7 @@ def rsync_state_dropdown(request):
     orm = saltstack_state.objects.all()
     for c,i in enumerate(orm):
         result['rsync_state_dropdown_list'].append({'text':i.name, 'id': c})
-    return HttpResponse(simplejson.dumps(result),content_type="application/json")
+    return HttpResponse(json.dumps(result),content_type="application/json")
 
 @login_required
 def server_operation(request):
@@ -265,11 +265,11 @@ def password_expire(request):
         expire_day = expire_day / 60 / 60 / 24
         if expire_day < 10:
             msg = '您的堡垒机密码将于%s天后过期，请尽快修改密码' % expire_day
-            return HttpResponse(simplejson.dumps({'code':0,'msg':msg}),content_type="application/json")
+            return HttpResponse(json.dumps({'code':0,'msg':msg}),content_type="application/json")
         else:
-            return HttpResponse(simplejson.dumps({'code':1}),content_type="application/json")
+            return HttpResponse(json.dumps({'code':1}),content_type="application/json")
     else:
-        return HttpResponse(simplejson.dumps({'code':1}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':1}),content_type="application/json")
 
 @login_required
 def cmd_template(request):
@@ -329,7 +329,7 @@ def cmd_template_data(request):
                'iTotalDisplayRecords':iTotalRecords,
                'aaData':aaData
     }
-    return HttpResponse(simplejson.dumps(result),content_type="application/json")
+    return HttpResponse(json.dumps(result),content_type="application/json")
 
 @login_required
 def cmd_template_save(request):
@@ -345,10 +345,10 @@ def cmd_template_save(request):
             orm.description = description
             orm.cmd = cmd
             orm.save()
-        return HttpResponse(simplejson.dumps({'code':0,'msg':u'保存成功'}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':0,'msg':u'保存成功'}),content_type="application/json")
     except Exception,e:
         logger.error(e)
-        return HttpResponse(simplejson.dumps({'code':1,'msg':str(e)}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':1,'msg':str(e)}),content_type="application/json")
 
 @login_required
 def cmd_template_dropdown(request):
@@ -356,7 +356,7 @@ def cmd_template_dropdown(request):
     orm = command_template.objects.all()
     for i in orm:
         result.append({'text':i.description,'id':i.id})
-    return HttpResponse(simplejson.dumps(result),content_type="application/json")
+    return HttpResponse(json.dumps(result),content_type="application/json")
 
 @login_required
 def cmd_template_del(request):
@@ -364,10 +364,10 @@ def cmd_template_del(request):
         _id = request.POST.get('id')
         orm = command_template.objects.get(id=_id)
         orm.delete()
-        return HttpResponse(simplejson.dumps({'code':0,'msg':u'删除成功'}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':0,'msg':u'删除成功'}),content_type="application/json")
     except Exception,e:
         logger.error(e)
-        return HttpResponse(simplejson.dumps({'code':1,'msg':u'删除失败'}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':1,'msg':u'删除失败'}),content_type="application/json")
 
 @login_required
 def get_server_list(request):
@@ -436,13 +436,13 @@ def get_server_list(request):
                'iTotalDisplayRecords':iTotalRecords,
                'aaData':aaData
     }
-    return HttpResponse(simplejson.dumps(result),content_type="application/json")
+    return HttpResponse(json.dumps(result),content_type="application/json")
 
 @login_required
 def search_server_list(request):
     for k,v in CENTER_SERVER.items():
         if not check_center_server_up(v[0],v[1]):
-            return HttpResponse(simplejson.dumps({'code':1,'msg':u'无法连接到%s' % k}),content_type="application/json")
+            return HttpResponse(json.dumps({'code':1,'msg':u'无法连接到%s' % k}),content_type="application/json")
 
 
 
@@ -479,7 +479,7 @@ def search_server_list(request):
     p = Pool()
     p.spawn(gevent_run_all,CENTER_SERVER,client_send_data,server_list,p)
     p.join()
-    return HttpResponse(simplejson.dumps({'code':0,'msg':u'获取完成'}),content_type="application/json")
+    return HttpResponse(json.dumps({'code':0,'msg':u'获取完成'}),content_type="application/json")
 
 @login_required
 def run_cmd(request):
@@ -493,7 +493,7 @@ def run_cmd(request):
 
         for center_server in belong_tos:
             if not check_center_server_up(CENTER_SERVER[center_server][0],CENTER_SERVER[center_server][1]):
-                return HttpResponse(simplejson.dumps({'code':1,'msg':u'无法连接到%s' % center_server}),content_type="application/json")
+                return HttpResponse(json.dumps({'code':1,'msg':u'无法连接到%s' % center_server}),content_type="application/json")
 
         time_now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         servers = {}
@@ -523,10 +523,10 @@ def run_cmd(request):
                 cmd = u'模板 < %s >' % cmd_template
         for i in server_names:
             log.objects.create(source_ip=i,username=request.user.username,command=cmd,time=time_now)
-        return HttpResponse(simplejson.dumps({'code':0,'msg':u'完成执行完成','cmd_results':cmd_results}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':0,'msg':u'完成执行完成','cmd_results':cmd_results}),content_type="application/json")
     except Exception,e:
         logger.error(e)
-        return HttpResponse(simplejson.dumps({'code':1,'msg':u'完成执行失败'}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':1,'msg':u'完成执行失败'}),content_type="application/json")
 
 @login_required
 def server_del(request):
@@ -535,10 +535,10 @@ def server_del(request):
         for i in server_names.split(','):
             orm = server_list.objects.get(server_name=i)
             orm.delete()
-        return HttpResponse(simplejson.dumps({'code':0,'msg':u'服务器删除成功'}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':0,'msg':u'服务器删除成功'}),content_type="application/json")
     except Exception,e:
         logger.error(e)
-        return HttpResponse(simplejson.dumps({'code':1,'msg':u'服务器删除失败'}),content_type="application/json")
+        return HttpResponse(json.dumps({'code':1,'msg':u'服务器删除失败'}),content_type="application/json")
 
 # @login_required
 # def sync_password(request):
@@ -564,24 +564,24 @@ def server_del(request):
 #         for k,v in servers.items():
 #             v = ','.join(v)
 #             client_send_data("{'salt':1,'act':'cmd.run','hosts':'%s','argv':%s}" % (v,cmd.split(',')),CENTER_SERVER[k][0],CENTER_SERVER[k][1])
-#         return HttpResponse(simplejson.dumps({'code':0,'msg':u'密码同步完成'}),content_type="application/json")
+#         return HttpResponse(json.dumps({'code':0,'msg':u'密码同步完成'}),content_type="application/json")
 #     except Exception,e:
 #         logger.error(e)
-#         return HttpResponse(simplejson.dumps({'code':1,'msg':u'密码同步失败'}),content_type="application/json")
+#         return HttpResponse(json.dumps({'code':1,'msg':u'密码同步失败'}),content_type="application/json")
 
 # @login_required
 # def login_server(request):
 #     # shellinabox = open_web_shell()
 #     # a = Process(target=shellinabox.open,args=(20002,'192.168.100.151'))
 #     # a.start()
-#     # return HttpResponse(simplejson.dumps({'code':0,'msg':u'shell开启成功'}),content_type="application/json")
+#     # return HttpResponse(json.dumps({'code':0,'msg':u'shell开启成功'}),content_type="application/json")
 #     server_ips = request.POST.get('server_ips')
 #     for i in server_ips.split(','):
 #         shellinabox = open_web_shell()
 #         if shellinabox.process(i):
-#             return HttpResponse(simplejson.dumps({'code':0,'msg':u'shell开启成功'}),content_type="application/json")
+#             return HttpResponse(json.dumps({'code':0,'msg':u'shell开启成功'}),content_type="application/json")
 #         else:
-#             return HttpResponse(simplejson.dumps({'code':1,'msg':u'shell开启失败'}),content_type="application/json")
+#             return HttpResponse(json.dumps({'code':1,'msg':u'shell开启失败'}),content_type="application/json")
 
 @login_required
 def fortress_server(request):
