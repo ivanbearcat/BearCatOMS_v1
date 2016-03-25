@@ -330,7 +330,7 @@ def salt_state_save(request):
         for i in center_server.split(','):
             master_dir = commands.getoutput('''ssh %s "grep -A2 '^file_roots' /etc/salt/master |grep 'base:' -A1|grep '-'|cut -d'-' -f2"''' % CENTER_SERVER[i][0])
             # os.system('''ssh %s "mkdir -p %s/%s;cat > %s/%s/init.sls << EOF\n%s\nEOF"''' % (CENTER_SERVER[i][0],master_dir,name,master_dir,name,content))
-            cmd = '''mkdir -p %s/%s;cat > %s/%s/init.sls << EOF\n%s\nEOF''' % (master_dir,name,master_dir,name,content)
+            cmd = '''mkdir -p %s/%s;cat > %s/%s/init.sls << EOF\n%s\nEOF''' % (master_dir,name,master_dir,name,content.replace('$','\$'))
             r_cmd(CENTER_SERVER[i][0],cmd)
         if _id =='':
             saltstack_state.objects.create(center_server=center_server,name=name,content=content)
