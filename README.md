@@ -1,4 +1,4 @@
 # BearCatOMS_v1
-依赖包
-MySQLdb
+__依赖包__  
+MySQLdb  
 PyYAML
