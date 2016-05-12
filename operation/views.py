@@ -257,7 +257,10 @@ def server_operation(request):
 
 @login_required
 def password_expire(request):
-    orm = perm.objects.get(username=request.user.username)
+    try:
+        orm = perm.objects.get(username=request.user.username)
+    except Exception:
+        return HttpResponse(json.dumps({'code':1}),content_type="application/json")
     expire_time = orm.server_password_expire
     if expire_time:
         expire_time_format = datetime.date(int(expire_time.split('-')[0]),int(expire_time.split('-')[1]),int(expire_time.split('-')[2]))
