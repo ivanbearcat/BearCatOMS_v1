@@ -46,7 +46,6 @@ def posix_shell(chan,web_username,hostname):
         DATABASES = literal_eval(DATABASES)
 
     oldtty = termios.tcgetattr(sys.stdin)
-    print DATABASES['HOST'],DATABASES['USER'],DATABASES['PASSWORD'],DATABASES['NAME']
     conn=MySQLdb.connect(host=DATABASES['HOST'],user=DATABASES['USER'],passwd=DATABASES['PASSWORD'],db=DATABASES['NAME'],port=3306,charset="utf8")
     cur = conn.cursor()
 

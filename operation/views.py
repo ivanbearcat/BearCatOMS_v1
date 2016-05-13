@@ -162,6 +162,9 @@ def upload_upload(request):
         # orm = upload_files.objects.get(file_name=file_name)
         rsync_dest = request.POST.get('rsync_dest')
         rsync_state = request.POST.get('rsync_state')
+        for k,v in CENTER_SERVER.items():
+            if not check_center_server_up(v[0],v[1]):
+                return HttpResponse(json.dumps({'code':1,'msg':u'无法连接到%s' % k}),content_type="application/json")
         if rsync_dest:
             rsync_ip = CENTER_SERVER[rsync_dest][0]
             if rsync_state:
@@ -419,9 +422,12 @@ def get_server_list(request):
 
     orm = perm.objects.get(username=request.user.username)
     servers = []
-    for i in orm.server_groups.split(','):
-        orm_server = server_group_list.objects.get(server_group_name=i)
-        servers += orm_server.members_server.split(',')
+    try:
+        for i in orm.server_groups.split(','):
+            orm_server = server_group_list.objects.get(server_group_name=i)
+            servers += orm_server.members_server.split(',')
+    except Exception:
+        pass
 
     for i in  result_data:
         if i.server_name in servers:
