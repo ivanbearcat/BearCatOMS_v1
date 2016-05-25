@@ -322,12 +322,13 @@ def cmd_template_data(request):
                                                  Q(cmd__contains=sSearch)).count()
 
     for i in  result_data:
-        cmd = []
-        for j in i.cmd.split('\n'):
-            cmd.append(j+'<br>')
+        cmd_list = []
+        cmd = i.cmd.replace('<','&lt;').replace('>','&gt;')
+        for j in cmd.split('\n'):
+            cmd_list.append(j+'<br>')
         aaData.append({
                        '0':i.description,
-                       '1':''.join(cmd),
+                       '1':''.join(cmd_list),
                        '2':i.id
                       })
     result = {'sEcho':sEcho,
