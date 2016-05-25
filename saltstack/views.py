@@ -303,13 +303,14 @@ def salt_state_data(request):
                                                  Q(content__contains=sSearch)).count()
 
     for i in  result_data:
-        content = []
-        for j in i.content.split('\n'):
-            content.append(j+'<br>')
+        content_list = []
+        content = i.content.replace('<','&lt;').replace('>','&gt;')
+        for j in content.split('\n'):
+            content_list.append(j+'<br>')
         aaData.append({
                        '0':i.center_server,
                        '1':i.name,
-                       '2':''.join(content).replace(' ','&nbsp'),
+                       '2':''.join(content_list).replace(' ','&nbsp'),
                        '3':i.id
                       })
     result = {'sEcho':sEcho,
