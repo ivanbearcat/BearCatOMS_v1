@@ -20,4 +20,4 @@ pycrypto
 2. 升级到1.8.13需要修改log：  
 \#from django.utils.log import logger  
 import logging  
-logger = logging.getLogger(__name__)  
+logger = logging.getLogger(\_\_name\_\_)  
