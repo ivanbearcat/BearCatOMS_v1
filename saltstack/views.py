@@ -231,26 +231,33 @@ def salt_top_run(request):
         os.system('''ssh %s "cat > %s/top.sls << EOF\n%s"''' % (CENTER_SERVER[i][0],master_dir,content))
 
     try:
-        def gevent_run_all(CENTER_SERVER,client_send_data,p,q):
-            for i in run_target_dict.keys():
-                for j in run_target_dict[i]:
-                    p.spawn(gevent_run,CENTER_SERVER,client_send_data,i,j[0],q)
-        def gevent_run(CENTER_SERVER,client_send_data,i,j,q):
-            cmd_result = client_send_data(json.dumps({'salt':1,'act':'state.highstate','hosts':j,'argv':''}),CENTER_SERVER[i][0],CENTER_SERVER[i][1])
-            cmd_result = convert_str_to_html(cmd_result)
-            q.put(cmd_result)
-        p = Pool()
-        q = Queue()
-        p.spawn(gevent_run_all,CENTER_SERVER,client_send_data,p,q)
-        p.join()
-        for i in range(q.qsize()):
-            cmd_result = q.get()
-            if not cmd_results:
-                cmd_results = cmd_result
-            else:
-                cmd_results = cmd_results + '<br><br><br><br>' + cmd_result
+        # def gevent_run_all(CENTER_SERVER,client_send_data,p,q):
+        #     for i in run_target_dict.keys():
+        #         for j in run_target_dict[i]:
+        #             p.spawn(gevent_run,CENTER_SERVER,client_send_data,i,j[0],q)
+        # def gevent_run(CENTER_SERVER,client_send_data,i,j,q):
+        #     cmd_result = client_send_data(json.dumps({'salt':1,'act':'state.highstate','hosts':j,'argv':''}),CENTER_SERVER[i][0],CENTER_SERVER[i][1])
+        #     cmd_result = convert_str_to_html(cmd_result)
+        #     q.put(cmd_result)
+        # p = Pool()
+        # q = Queue()
+        # p.spawn(gevent_run_all,CENTER_SERVER,client_send_data,p,q)
+        # p.join()
+        # for i in range(q.qsize()):
+        #     cmd_result = q.get()
+        #     if not cmd_results:
+        #         cmd_results = cmd_result
+        #     else:
+        #         cmd_results = cmd_results + '<br><br><br><br>' + cmd_result
+
+        hosts_list = []
+        for i in run_target_dict.keys():
+            for j in run_target_dict[i]:
+                hosts_list.append(j[0])
+            cmd_result = client_send_data(json.dumps({'salt':1,'act':'state.highstate','hosts':','.join(hosts_list),'argv':''}),CENTER_SERVER[i][0],CENTER_SERVER[i][1])
+            cmd_results = convert_str_to_html(cmd_result)
         return HttpResponse(json.dumps({'code':0,'msg':u'模块执行完成','cmd_results':cmd_results}),content_type="application/json")
-    except Exception,e:
+    except Exception:
         return HttpResponse(json.dumps({'code':1,'msg':u'模块执行失败'}),content_type="application/json")
 
 @login_required
