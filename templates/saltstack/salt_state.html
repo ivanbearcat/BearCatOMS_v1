@@ -352,5 +352,11 @@ function del() {
     }
 }
 
+$(document).keyup(function(event){
+    if ($("#myModal").attr('aria-hidden') == 'true' && event.keyCode == 69){
+        edit()
+    }
+});
+
 </script>
 {% endblock %}
