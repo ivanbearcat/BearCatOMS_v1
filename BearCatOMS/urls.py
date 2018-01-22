@@ -8,6 +8,7 @@ from assets.views import *
 from audit.views import *
 from operation.views import *
 from saltstack.views import *
+from server_info.views import *
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -93,4 +94,8 @@ urlpatterns = patterns('',
     url(r'^salt_pillar_data/', salt_pillar_data),
     url(r'^salt_pillar_save/', salt_pillar_save),
     url(r'^salt_pillar_del/', salt_pillar_del),
+    url(r'^server_info_table/', server_info_table),
+    url(r'^server_info_data/', server_info_data),
+    url(r'^server_info_save/', server_info_save),
+    url(r'^server_info_del/', server_info_del),
 )

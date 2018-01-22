@@ -136,6 +136,7 @@ INSTALLED_APPS = (
     'audit',
     'operation',
     'saltstack',
+    'server_info'
 )
 
 # A sample logging configuration. The only tangible logging
@@ -180,8 +181,8 @@ LOGGING = {
          },
      },
  }
-SESSION_SAVE_EVERY_REQUEST = True
-SESSION_COOKIE_AGE = 600
+# SESSION_SAVE_EVERY_REQUEST = True
+# SESSION_COOKIE_AGE = 600
 #DATAFILE_MAXSIZE = 1024000000
 #DATAFILE_TMP_MAXSIZE = 1024000000
 #FILE_UPLOAD_MAX_MEMORY_SIZE =  1024000000
