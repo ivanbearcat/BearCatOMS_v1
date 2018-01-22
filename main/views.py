@@ -8,6 +8,6 @@ from django.contrib.auth.decorators import login_required
 @login_required
 def main(request):
     path = request.path.split('/')[1]
-    return render(request,'public/index.html',{'user':request.user.username,
+    return render(request,'public/index.html',{'user':request.user.first_name,
                                                    'path1':path,
                                                    'page_name1':u'主页'})

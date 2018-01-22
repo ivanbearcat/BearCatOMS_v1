@@ -31,62 +31,127 @@ def server_info_data(request):
     sSortDir_0 = request.POST.get('sSortDir_0')#asc/desc
     sSearch = request.POST.get('sSearch')#高级搜索
 
+    IDC = request.POST.get('IDC')
+
     aaData = []
     sort = ['IDC','position','application','external_IP','inner_IP_1','inner_IP_2','manage_IP','root_pass',
             'ubuntu_pass','comment_1','comment_2','comment_3','comment_4','id']
 
-    if  sSortDir_0 == 'asc':
-        if sSearch == '':
-            result_data = table.objects.all().order_by(sort[iSortCol_0])[iDisplayStart:iDisplayStart+iDisplayLength]
-            iTotalRecords = table.objects.all().count()
+    if IDC == 'all':
+        if  sSortDir_0 == 'asc':
+            if sSearch == '':
+                result_data = table.objects.all().order_by(sort[iSortCol_0])[iDisplayStart:iDisplayStart+iDisplayLength]
+                iTotalRecords = table.objects.all().count()
+            else:
+                result_data = table.objects.filter(Q(IDC__contains=sSearch) | \
+                                                   Q(application__contains=sSearch) | \
+                                                   Q(external_IP__contains=sSearch) | \
+                                                   Q(inner_IP_1__contains=sSearch) | \
+                                                   Q(inner_IP_2__contains=sSearch) | \
+                                                   Q(manage_IP__contains=sSearch) | \
+                                                   Q(comment_1__contains=sSearch) | \
+                                                   Q(comment_2__contains=sSearch) | \
+                                                   Q(comment_3__contains=sSearch) | \
+                                                   Q(comment_4__contains=sSearch) | \
+                                                   Q(id__contains=sSearch)) \
+                                                .order_by(sort[iSortCol_0])[iDisplayStart:iDisplayStart+iDisplayLength]
+                iTotalRecords = table.objects.filter(Q(IDC__contains=sSearch) | \
+                                                   Q(application__contains=sSearch) | \
+                                                   Q(external_IP__contains=sSearch) | \
+                                                   Q(inner_IP_1__contains=sSearch) | \
+                                                   Q(inner_IP_2__contains=sSearch) | \
+                                                   Q(manage_IP__contains=sSearch) | \
+                                                   Q(comment_1__contains=sSearch) | \
+                                                   Q(comment_2__contains=sSearch) | \
+                                                   Q(comment_3__contains=sSearch) | \
+                                                   Q(comment_4__contains=sSearch) | \
+                                                   Q(id__contains=sSearch)).count()
         else:
-            result_data = table.objects.filter(Q(application__contains=sSearch) | \
-                                               Q(external_IP__contains=sSearch) | \
-                                               Q(inner_IP_1__contains=sSearch) | \
-                                               Q(inner_IP_2__contains=sSearch) | \
-                                               Q(manage_IP__contains=sSearch) | \
-                                               Q(comment_1__contains=sSearch) | \
-                                               Q(comment_2__contains=sSearch) | \
-                                               Q(comment_3__contains=sSearch) | \
-                                               Q(comment_4__contains=sSearch) | \
-                                               Q(id__contains=sSearch)) \
-                                            .order_by(sort[iSortCol_0])[iDisplayStart:iDisplayStart+iDisplayLength]
-            iTotalRecords = table.objects.filter(Q(application__contains=sSearch) | \
-                                               Q(external_IP__contains=sSearch) | \
-                                               Q(inner_IP_1__contains=sSearch) | \
-                                               Q(inner_IP_2__contains=sSearch) | \
-                                               Q(manage_IP__contains=sSearch) | \
-                                               Q(comment_1__contains=sSearch) | \
-                                               Q(comment_2__contains=sSearch) | \
-                                               Q(comment_3__contains=sSearch) | \
-                                               Q(comment_4__contains=sSearch) | \
-                                               Q(id__contains=sSearch)).count()
+            if sSearch == '':
+                result_data = table.objects.all().order_by(sort[iSortCol_0]).reverse()[iDisplayStart:iDisplayStart+iDisplayLength]
+                iTotalRecords = table.objects.all().count()
+            else:
+                result_data = table.objects.filter(Q(IDC__contains=sSearch) | \
+                                                   Q(application__contains=sSearch) | \
+                                                   Q(external_IP__contains=sSearch) | \
+                                                   Q(inner_IP_1__contains=sSearch) | \
+                                                   Q(inner_IP_2__contains=sSearch) | \
+                                                   Q(manage_IP__contains=sSearch) | \
+                                                   Q(comment_1__contains=sSearch) | \
+                                                   Q(comment_2__contains=sSearch) | \
+                                                   Q(comment_3__contains=sSearch) | \
+                                                   Q(comment_4__contains=sSearch) | \
+                                                   Q(id__contains=sSearch)) \
+                                                .order_by(sort[iSortCol_0]).reverse()[iDisplayStart:iDisplayStart+iDisplayLength]
+                iTotalRecords = table.objects.filter(Q(IDC__contains=sSearch) | \
+                                                   Q(application__contains=sSearch) | \
+                                                   Q(external_IP__contains=sSearch) | \
+                                                   Q(inner_IP_1__contains=sSearch) | \
+                                                   Q(inner_IP_2__contains=sSearch) | \
+                                                   Q(manage_IP__contains=sSearch) | \
+                                                   Q(comment_1__contains=sSearch) | \
+                                                   Q(comment_2__contains=sSearch) | \
+                                                   Q(comment_3__contains=sSearch) | \
+                                                   Q(comment_4__contains=sSearch) | \
+                                                   Q(id__contains=sSearch)).count()
     else:
-        if sSearch == '':
-            result_data = table.objects.all().order_by(sort[iSortCol_0]).reverse()[iDisplayStart:iDisplayStart+iDisplayLength]
-            iTotalRecords = table.objects.all().count()
+        if  sSortDir_0 == 'asc':
+            if sSearch == '':
+                result_data = table.objects.filter(IDC=IDC).order_by(sort[iSortCol_0])[iDisplayStart:iDisplayStart+iDisplayLength]
+                iTotalRecords = table.objects.filter(IDC=IDC).count()
+            else:
+                result_data = table.objects.filter(IDC=IDC).filter(Q(IDC__contains=sSearch) | \
+                                                   Q(application__contains=sSearch) | \
+                                                   Q(external_IP__contains=sSearch) | \
+                                                   Q(inner_IP_1__contains=sSearch) | \
+                                                   Q(inner_IP_2__contains=sSearch) | \
+                                                   Q(manage_IP__contains=sSearch) | \
+                                                   Q(comment_1__contains=sSearch) | \
+                                                   Q(comment_2__contains=sSearch) | \
+                                                   Q(comment_3__contains=sSearch) | \
+                                                   Q(comment_4__contains=sSearch) | \
+                                                   Q(id__contains=sSearch)) \
+                                                .order_by(sort[iSortCol_0])[iDisplayStart:iDisplayStart+iDisplayLength]
+                iTotalRecords = table.objects.filter(IDC=IDC).filter(Q(IDC__contains=sSearch) | \
+                                                   Q(application__contains=sSearch) | \
+                                                   Q(external_IP__contains=sSearch) | \
+                                                   Q(inner_IP_1__contains=sSearch) | \
+                                                   Q(inner_IP_2__contains=sSearch) | \
+                                                   Q(manage_IP__contains=sSearch) | \
+                                                   Q(comment_1__contains=sSearch) | \
+                                                   Q(comment_2__contains=sSearch) | \
+                                                   Q(comment_3__contains=sSearch) | \
+                                                   Q(comment_4__contains=sSearch) | \
+                                                   Q(id__contains=sSearch)).count()
         else:
-            result_data = table.objects.filter(Q(application__contains=sSearch) | \
-                                               Q(external_IP__contains=sSearch) | \
-                                               Q(inner_IP_1__contains=sSearch) | \
-                                               Q(inner_IP_2__contains=sSearch) | \
-                                               Q(manage_IP__contains=sSearch) | \
-                                               Q(comment_1__contains=sSearch) | \
-                                               Q(comment_2__contains=sSearch) | \
-                                               Q(comment_3__contains=sSearch) | \
-                                               Q(comment_4__contains=sSearch) | \
-                                               Q(id__contains=sSearch)) \
-                                            .order_by(sort[iSortCol_0]).reverse()[iDisplayStart:iDisplayStart+iDisplayLength]
-            iTotalRecords = table.objects.filter(Q(application__contains=sSearch) | \
-                                               Q(external_IP__contains=sSearch) | \
-                                               Q(inner_IP_1__contains=sSearch) | \
-                                               Q(inner_IP_2__contains=sSearch) | \
-                                               Q(manage_IP__contains=sSearch) | \
-                                               Q(comment_1__contains=sSearch) | \
-                                               Q(comment_2__contains=sSearch) | \
-                                               Q(comment_3__contains=sSearch) | \
-                                               Q(comment_4__contains=sSearch) | \
-                                               Q(id__contains=sSearch)).count()
+            if sSearch == '':
+                result_data = table.objects.filter(IDC=IDC).order_by(sort[iSortCol_0]).reverse()[iDisplayStart:iDisplayStart+iDisplayLength]
+                iTotalRecords = table.objects.filter(IDC=IDC).count()
+            else:
+                result_data = table.objects.filter(IDC=IDC).filter(Q(IDC__contains=sSearch) | \
+                                                   Q(application__contains=sSearch) | \
+                                                   Q(external_IP__contains=sSearch) | \
+                                                   Q(inner_IP_1__contains=sSearch) | \
+                                                   Q(inner_IP_2__contains=sSearch) | \
+                                                   Q(manage_IP__contains=sSearch) | \
+                                                   Q(comment_1__contains=sSearch) | \
+                                                   Q(comment_2__contains=sSearch) | \
+                                                   Q(comment_3__contains=sSearch) | \
+                                                   Q(comment_4__contains=sSearch) | \
+                                                   Q(id__contains=sSearch)) \
+                                                .order_by(sort[iSortCol_0]).reverse()[iDisplayStart:iDisplayStart+iDisplayLength]
+                iTotalRecords = table.objects.filter(IDC=IDC).filter(Q(IDC__contains=sSearch) | \
+                                                   Q(application__contains=sSearch) | \
+                                                   Q(external_IP__contains=sSearch) | \
+                                                   Q(inner_IP_1__contains=sSearch) | \
+                                                   Q(inner_IP_2__contains=sSearch) | \
+                                                   Q(manage_IP__contains=sSearch) | \
+                                                   Q(comment_1__contains=sSearch) | \
+                                                   Q(comment_2__contains=sSearch) | \
+                                                   Q(comment_3__contains=sSearch) | \
+                                                   Q(comment_4__contains=sSearch) | \
+                                                   Q(id__contains=sSearch)).count()
+
     for i in  result_data:
         aaData.append({
                        '0':i.IDC,
