@@ -98,4 +98,6 @@ urlpatterns = patterns('',
     url(r'^server_info_data/', server_info_data),
     url(r'^server_info_save/', server_info_save),
     url(r'^server_info_del/', server_info_del),
+    url(r'^domain_name_CRT_table/', domain_name_CRT_table),
+    url(r'^domain_name_CRT_data/', domain_name_CRT_data),
 )

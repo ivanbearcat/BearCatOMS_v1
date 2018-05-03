@@ -5,7 +5,7 @@ from django.utils.log import logger
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
 from django.db.models.query_utils import Q
-from server_info.models import table
+from server_info.models import table, domain_name_CRT
 from libs.check_perm import check_permission
 import json
 
@@ -234,3 +234,132 @@ def server_info_del(request):
         return HttpResponse(json.dumps({'code':0,'msg':u'删除成功'}),content_type="application/json")
     except Exception,e:
         return HttpResponse(json.dumps({'code':1,'msg':str(e)}),content_type="application/json")
+
+
+
+
+@login_required
+def domain_name_CRT_table(request):
+    # if not request.user.has_perm('server_info.can_view'):
+    #     return render(request,'public/no_passing.html')
+    path = request.path.split('/')[1]
+    return render(request,'server_info/domain_name_CRT_table.html',{'user':request.user.username,
+                                                               'path1':'server_info',
+                                                               'path2':path,
+                                                               'page_name1':u'信息表',
+                                                               'page_name2':u'域名及证书信息表'})
+
+
+
+
+
+
+@login_required
+def domain_name_CRT_data(request):
+    sEcho =  request.POST.get('sEcho') #标志，直接返回
+    iDisplayStart = int(request.POST.get('iDisplayStart'))#第几行开始
+    iDisplayLength = int(request.POST.get('iDisplayLength'))#显示多少行
+    iSortCol_0 = int(request.POST.get("iSortCol_0"))#排序行号
+    sSortDir_0 = request.POST.get('sSortDir_0')#asc/desc
+    sSearch = request.POST.get('sSearch')#高级搜索
+
+    IDC = request.POST.get('IDC')
+
+    aaData = []
+    sort = ['name_server','apply_time','name_server_expiration_time','CRT_expiration_time','DNSPOD','account','comment','ICP']
+
+    if  sSortDir_0 == 'asc':
+        if sSearch == '':
+            result_data = domain_name_CRT.objects.all().order_by(sort[iSortCol_0])[iDisplayStart:iDisplayStart+iDisplayLength]
+            iTotalRecords = domain_name_CRT.objects.all().count()
+        else:
+            result_data = domain_name_CRT.objects.filter(Q(IDC__contains=sSearch) | \
+                                               Q(application__contains=sSearch) | \
+                                               Q(external_IP__contains=sSearch) | \
+                                               Q(inner_IP_1__contains=sSearch) | \
+                                               Q(inner_IP_2__contains=sSearch) | \
+                                               Q(manage_IP__contains=sSearch) | \
+                                               Q(comment_1__contains=sSearch) | \
+                                               Q(comment_2__contains=sSearch) | \
+                                               Q(comment_3__contains=sSearch) | \
+                                               Q(comment_4__contains=sSearch) | \
+                                               Q(id__contains=sSearch)) \
+                                            .order_by(sort[iSortCol_0])[iDisplayStart:iDisplayStart+iDisplayLength]
+            iTotalRecords = domain_name_CRT.objects.filter(Q(IDC__contains=sSearch) | \
+                                               Q(application__contains=sSearch) | \
+                                               Q(external_IP__contains=sSearch) | \
+                                               Q(inner_IP_1__contains=sSearch) | \
+                                               Q(inner_IP_2__contains=sSearch) | \
+                                               Q(manage_IP__contains=sSearch) | \
+                                               Q(comment_1__contains=sSearch) | \
+                                               Q(comment_2__contains=sSearch) | \
+                                               Q(comment_3__contains=sSearch) | \
+                                               Q(comment_4__contains=sSearch) | \
+                                               Q(id__contains=sSearch)).count()
+    else:
+        if sSearch == '':
+            result_data = domain_name_CRT.objects.all().order_by(sort[iSortCol_0]).reverse()[iDisplayStart:iDisplayStart+iDisplayLength]
+            iTotalRecords = domain_name_CRT.objects.all().count()
+        else:
+            result_data = domain_name_CRT.objects.filter(Q(IDC__contains=sSearch) | \
+                                               Q(application__contains=sSearch) | \
+                                               Q(external_IP__contains=sSearch) | \
+                                               Q(inner_IP_1__contains=sSearch) | \
+                                               Q(inner_IP_2__contains=sSearch) | \
+                                               Q(manage_IP__contains=sSearch) | \
+                                               Q(comment_1__contains=sSearch) | \
+                                               Q(comment_2__contains=sSearch) | \
+                                               Q(comment_3__contains=sSearch) | \
+                                               Q(comment_4__contains=sSearch) | \
+                                               Q(id__contains=sSearch)) \
+                                            .order_by(sort[iSortCol_0]).reverse()[iDisplayStart:iDisplayStart+iDisplayLength]
+            iTotalRecords = domain_name_CRT.objects.filter(Q(IDC__contains=sSearch) | \
+                                               Q(application__contains=sSearch) | \
+                                               Q(external_IP__contains=sSearch) | \
+                                               Q(inner_IP_1__contains=sSearch) | \
+                                               Q(inner_IP_2__contains=sSearch) | \
+                                               Q(manage_IP__contains=sSearch) | \
+                                               Q(comment_1__contains=sSearch) | \
+                                               Q(comment_2__contains=sSearch) | \
+                                               Q(comment_3__contains=sSearch) | \
+                                               Q(comment_4__contains=sSearch) | \
+                                               Q(id__contains=sSearch)).count()
+
+
+    for i in  result_data:
+        if i.apply_time == None:
+            apply_time = ''
+        else:
+            apply_time = str(i.apply_time)
+
+        if i.name_server_expiration_time == None:
+            name_server_expiration_time = ''
+        else:
+            name_server_expiration_time = str(i.name_server_expiration_time)
+
+        if i.CRT_expiration_time == None:
+            CRT_expiration_time = ''
+        else:
+            CRT_expiration_time = str(i.CRT_expiration_time)
+        aaData.append({
+                       '0':i.name_server,
+                       '1':apply_time,
+                       '2':name_server_expiration_time,
+                       '3':CRT_expiration_time,
+                       '4':i.DNSPOD,
+                       '5':i.account,
+                       '6':i.comment,
+                       '7':i.ICP,
+                       '8':i.id,
+                      })
+    result = {'sEcho':sEcho,
+               'iTotalRecords':iTotalRecords,
+               'iTotalDisplayRecords':iTotalRecords,
+               'aaData':aaData
+    }
+    return HttpResponse(json.dumps(result),content_type="application/json")
+
+
+
+
+
